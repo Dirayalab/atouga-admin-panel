@@ -530,13 +530,13 @@
         if (primary) {
           const badge = document.createElement('span');
           badge.className = 'badge badge-primary';
-          badge.textContent = 'رئيسي';
+          badge.textContent = window.I18N ? window.I18N.t('primaryBadge') : 'رئيسي';
           nameRow.appendChild(badge);
         }
         if (!row.is_active) {
           const badge = document.createElement('span');
           badge.className = 'badge badge-frozen';
-          badge.textContent = 'مجمّد';
+          badge.textContent = window.I18N ? window.I18N.t('frozenBadge') : 'مجمّد';
           nameRow.appendChild(badge);
         }
         const meta = document.createElement('div');
