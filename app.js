@@ -11,6 +11,8 @@
     window.SUPABASE_ANON_KEY,
   );
 
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   let toastContainer = null;
 
   function toast(message, type) {
@@ -43,6 +45,22 @@
       return 'تعذّر الاتصال بالخادم. تحقق من الشبكة.';
     }
     return msg || 'حدث خطأ غير متوقع.';
+  }
+
+  /** يستخرج رسالة الخطأ المحددة من استجابة Edge Function غير الناجحة. */
+  function extractEdgeError(error) {
+    try {
+      const body = error && error.context ? error.context.body : null;
+      if (body && typeof body === 'object') {
+        const detail = body.error || body.msg || body.message;
+        if (detail) {
+          return String(detail);
+        }
+      }
+    } catch (_) {
+      // نعود للرسالة العامة.
+    }
+    return friendlyError(error && error.message);
   }
 
   function formatDate(iso) {
@@ -178,7 +196,11 @@
         event.preventDefault();
         const email = document.getElementById('newEmail').value.trim();
         const password = document.getElementById('newPassword').value;
-        if (!email || password.length < 6) {
+        if (!EMAIL_RE.test(email)) {
+          toast('يرجى إدخال بريد إلكتروني صحيح.', 'error');
+          return;
+        }
+        if (password.length < 6) {
           toast('أدخل بريداً صالحاً وكلمة مرور (6 أحرف على الأقل).', 'error');
           return;
         }
@@ -203,7 +225,7 @@
           toast('تم إنشاء الحساب: ' + data.email + ' (' + data.role + ')', 'success');
           form.reset();
         } catch (error) {
-          toast('فشل إنشاء الحساب: ' + friendlyError(error.message), 'error');
+          toast('فشل إنشاء الحساب: ' + extractEdgeError(error), 'error');
         } finally {
           btn.disabled = false;
           btn.textContent = 'إنشاء الحساب';
