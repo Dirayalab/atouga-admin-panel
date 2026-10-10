@@ -16,6 +16,35 @@
 
   let toastContainer = null;
 
+  function esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, function (m) {
+      return {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }[m];
+    });
+  }
+
+  function roleLabel(role) {
+    switch (role) {
+      case 'super_admin':
+        return 'مدير عام';
+      case 'manager':
+        return 'مدير';
+      case 'marketer':
+        return 'مسوّق';
+      case 'driver':
+        return 'سائق';
+      case 'packager':
+        return 'معبئ';
+      default:
+        return esc(role);
+    }
+  }
+
   function toast(message, type) {
     if (!toastContainer) {
       toastContainer = document.createElement('div');
@@ -177,6 +206,8 @@
     }
 
     initCreateAccount();
+    initTabs();
+    initAccounts();
 
     (async function () {
       const session = await requireSuperAdmin();
@@ -225,6 +256,9 @@
           }
           toast('تم إنشاء الحساب: ' + data.username + ' (' + data.role + ')', 'success');
           form.reset();
+          if (typeof window.adminPanelLoadAccounts === 'function') {
+            window.adminPanelLoadAccounts();
+          }
         } catch (error) {
           toast('فشل إنشاء الحساب: ' + extractEdgeError(error), 'error');
         } finally {
@@ -234,7 +268,14 @@
       });
     }
 
-    refreshBtn.addEventListener('click', loadRequests);
+    refreshBtn.addEventListener('click', async function () {
+      await Promise.all([
+        loadRequests().catch(function () {}),
+        typeof window.adminPanelLoadAccounts === 'function'
+          ? window.adminPanelLoadAccounts().catch(function () {})
+          : Promise.resolve(),
+      ]);
+    });
     logoutBtn.addEventListener('click', async function () {
       await supabase.auth.signOut();
       window.location.replace('index.html');
@@ -378,6 +419,341 @@
         btn.textContent = btn.dataset.label || 'إعادة المحاولة';
         toast('فشلت العملية: ' + friendlyError(error.message), 'error');
       }
+    }
+
+    function initTabs() {
+      const tabs = document.getElementById('tabs');
+      if (!tabs) {
+        return;
+      }
+      tabs.querySelectorAll('.tab-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          tabs.querySelectorAll('.tab-btn').forEach(function (b) {
+            b.classList.toggle('active', b === btn);
+          });
+          ['requests', 'create', 'accounts'].forEach(function (name) {
+            const panel = document.getElementById('tab-' + name);
+            if (panel) {
+              panel.classList.toggle('hidden', name !== btn.dataset.tab);
+            }
+          });
+        });
+      });
+    }
+
+    function initAccounts() {
+      const list = document.getElementById('accountsList');
+      const counter = document.getElementById('accountsCount');
+      const overlay = document.getElementById('modalOverlay');
+      if (!list || !counter || !overlay) {
+        return;
+      }
+
+      function openModal(html) {
+        overlay.classList.remove('hidden');
+        document.getElementById('modalBox').innerHTML = html;
+      }
+
+      function closeModal() {
+        overlay.classList.add('hidden');
+        document.getElementById('modalBox').innerHTML = '';
+      }
+
+      overlay.addEventListener('click', function (event) {
+        if (event.target === overlay) {
+          closeModal();
+        }
+      });
+
+      function isPrimary(row) {
+        return String(row.email || '').toLowerCase() === 'dirayalab@gmail.com';
+      }
+
+      async function loadAccounts() {
+        list.innerHTML = '';
+        const loading = document.createElement('div');
+        loading.className = 'loading';
+        loading.textContent = 'جارٍ تحميل الحسابات...';
+        list.appendChild(loading);
+        try {
+          const { data, error } = await supabase.rpc('admin_list_staff');
+          if (error) {
+            throw error;
+          }
+          renderAccounts(data || []);
+        } catch (error) {
+          list.innerHTML = '';
+          const div = document.createElement('div');
+          div.className = 'empty-state';
+          div.textContent = 'تعذّر تحميل الحسابات: ' + friendlyError(error.message);
+          list.appendChild(div);
+          toast('تعذّر تحميل الحسابات', 'error');
+        }
+      }
+
+      function renderAccounts(rows) {
+        list.innerHTML = '';
+        counter.textContent = String(rows.length);
+        if (rows.length === 0) {
+          const div = document.createElement('div');
+          div.className = 'empty-state';
+          div.textContent = 'لا توجد حسابات بعد.';
+          list.appendChild(div);
+          return;
+        }
+        rows.forEach(function (row) {
+          list.appendChild(buildAccountCard(row));
+        });
+      }
+
+      function buildAccountCard(row) {
+        const primary = isPrimary(row);
+        const card = document.createElement('div');
+        card.className = 'account-card' + (row.is_active ? '' : ' frozen');
+
+        const head = document.createElement('div');
+        head.className = 'account-head';
+        const avatar = document.createElement('div');
+        avatar.className = 'account-avatar';
+        avatar.textContent = String(row.username || row.email || '?').charAt(0).toUpperCase();
+        const info = document.createElement('div');
+        info.className = 'account-info';
+        const nameRow = document.createElement('div');
+        nameRow.className = 'account-name-row';
+        const name = document.createElement('span');
+        name.className = 'account-username';
+        name.textContent = row.username || row.email || '—';
+        nameRow.appendChild(name);
+        if (primary) {
+          const badge = document.createElement('span');
+          badge.className = 'badge badge-primary';
+          badge.textContent = 'رئيسي';
+          nameRow.appendChild(badge);
+        }
+        if (!row.is_active) {
+          const badge = document.createElement('span');
+          badge.className = 'badge badge-frozen';
+          badge.textContent = 'مجمّد';
+          nameRow.appendChild(badge);
+        }
+        const meta = document.createElement('div');
+        meta.className = 'account-meta';
+        meta.textContent = [
+          row.email,
+          roleLabel(row.role),
+          row.full_name ? row.full_name : null,
+          row.phone ? row.phone : null,
+        ].filter(Boolean).join(' • ');
+        info.appendChild(nameRow);
+        info.appendChild(meta);
+        head.appendChild(avatar);
+        head.appendChild(info);
+
+        const actions = document.createElement('div');
+        actions.className = 'request-actions';
+        actions.appendChild(ghostButton('تعديل', function () {
+          openEditModal(row);
+        }));
+        actions.appendChild(ghostButton('كلمة المرور', function () {
+          openPasswordModal(row);
+        }));
+        if (!primary) {
+          actions.appendChild(toneButton(row.is_active ? 'تجميد' : 'تفعيل', row.is_active ? 'btn-warning' : 'btn-success', function () {
+            toggleFreeze(row);
+          }));
+          actions.appendChild(toneButton('حذف', 'btn-danger', function () {
+            confirmDelete(row);
+          }));
+        }
+
+        card.appendChild(head);
+        card.appendChild(actions);
+        return card;
+      }
+
+      function ghostButton(label, onClick) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-ghost';
+        btn.textContent = label;
+        btn.addEventListener('click', onClick);
+        return btn;
+      }
+
+      function toneButton(label, toneClass, onClick) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn ' + toneClass;
+        btn.textContent = label;
+        btn.addEventListener('click', onClick);
+        return btn;
+      }
+
+      function openEditModal(row) {
+        const primary = isPrimary(row);
+        const options = ['manager', 'marketer', 'driver', 'packager']
+          .map(function (r) {
+            return '<option value="' + r + '"' + (row.role === r ? ' selected' : '') + '>' + roleLabel(r) + '</option>';
+          })
+          .join('');
+        const roleField = primary
+          ? '<p class="create-hint">دور الحساب الرئيسي ثابت.</p>'
+          : '<select id="editRole" class="input">' + options + '</select>';
+        openModal(
+          '<h3 class="modal-title">تعديل الحساب</h3>' +
+            '<div class="modal-body">' +
+            '<div class="field"><label for="editUsername">اسم المستخدم</label>' +
+            '<input id="editUsername" class="input" value="' + esc(row.username || '') + '"' + (primary ? ' readonly' : '') + ' /></div>' +
+            '<div class="field"><label for="editName">الاسم الكامل</label>' +
+            '<input id="editName" class="input" value="' + esc(row.full_name || '') + '" /></div>' +
+            '<div class="field"><label for="editPhone">رقم الهاتف</label>' +
+            '<input id="editPhone" class="input" value="' + esc(row.phone || '') + '" /></div>' +
+            '<div class="field"><label for="editRole">الدور</label>' + roleField + '</div>' +
+            '</div>' +
+            '<div class="modal-actions">' +
+            '<button id="modalCancel" class="btn btn-ghost" type="button">إلغاء</button>' +
+            '<button id="modalSave" class="btn btn-primary" type="button">حفظ</button>' +
+            '</div>',
+        );
+        document.getElementById('modalCancel').addEventListener('click', closeModal);
+        document.getElementById('modalSave').addEventListener('click', async function () {
+          const username = document.getElementById('editUsername').value.trim();
+          if (!USERNAME_RE.test(username)) {
+            toast('اسم المستخدم: 3-30 حرفاً (حروف/أرقام/نقطة/شرطة) فقط.', 'error');
+            return;
+          }
+          const save = document.getElementById('modalSave');
+          save.disabled = true;
+          save.textContent = 'حفظ...';
+          try {
+            const { error } = await supabase.rpc('admin_update_account', {
+              p_user_id: row.user_id,
+              p_username: username,
+              p_full_name: document.getElementById('editName').value.trim(),
+              p_phone: document.getElementById('editPhone').value.trim(),
+              p_role: document.getElementById('editRole').value,
+            });
+            if (error) {
+              throw error;
+            }
+            toast('تم حفظ التعديلات.', 'success');
+            closeModal();
+            await loadAccounts();
+          } catch (error) {
+            toast('فشل التعديل: ' + friendlyError(error.message), 'error');
+            save.disabled = false;
+            save.textContent = 'حفظ';
+          }
+        });
+      }
+
+      function openPasswordModal(row) {
+        openModal(
+          '<h3 class="modal-title">تغيير كلمة المرور</h3>' +
+            '<p class="create-hint">الحساب: ' + esc(row.username || row.email) + '</p>' +
+            '<div class="modal-body">' +
+            '<div class="field"><label for="pwdNew">كلمة المرور الجديدة</label>' +
+            '<input id="pwdNew" class="input" type="text" autocomplete="off" /></div>' +
+            '<div class="field"><label for="pwdConfirm">تأكيد كلمة المرور</label>' +
+            '<input id="pwdConfirm" class="input" type="text" autocomplete="off" /></div>' +
+            '</div>' +
+            '<div class="modal-actions">' +
+            '<button id="modalCancel" class="btn btn-ghost" type="button">إلغاء</button>' +
+            '<button id="modalSave" class="btn btn-primary" type="button">تغيير كلمة المرور</button>' +
+            '</div>',
+        );
+        document.getElementById('modalCancel').addEventListener('click', closeModal);
+        document.getElementById('modalSave').addEventListener('click', async function () {
+          const password = document.getElementById('pwdNew').value;
+          const confirm = document.getElementById('pwdConfirm').value;
+          if (password.length < 6) {
+            toast('كلمة المرور 6 أحرف على الأقل.', 'error');
+            return;
+          }
+          if (password !== confirm) {
+            toast('كلمتا المرور غير متطابقتين.', 'error');
+            return;
+          }
+          const save = document.getElementById('modalSave');
+          save.disabled = true;
+          save.textContent = 'جارٍ التغيير...';
+          try {
+            const { data, error } = await supabase.functions.invoke('admin-manage-user', {
+              body: { action: 'password', user_id: row.user_id, new_password: password },
+            });
+            if (error) {
+              throw error;
+            }
+            if (data && data.error) {
+              throw new Error(data.error);
+            }
+            toast('تم تغيير كلمة المرور.', 'success');
+            closeModal();
+          } catch (error) {
+            toast('فشل تغيير كلمة المرور: ' + extractEdgeError(error), 'error');
+            save.disabled = false;
+            save.textContent = 'تغيير كلمة المرور';
+          }
+        });
+      }
+
+      function toggleFreeze(row) {
+        const next = !row.is_active;
+        supabase
+          .rpc('admin_set_account_active', { p_user_id: row.user_id, p_active: next })
+          .then(function (result) {
+            if (result.error) {
+              throw result.error;
+            }
+            toast(next ? 'تم تجميد الحساب.' : 'تم تفعيل الحساب.', 'success');
+            loadAccounts();
+          })
+          .catch(function (error) {
+            toast('فشلت العملية: ' + friendlyError(error.message), 'error');
+          });
+      }
+
+      function confirmDelete(row) {
+        openModal(
+          '<h3 class="modal-title">حذف الحساب</h3>' +
+            '<p class="modal-text">سيُحذف الحساب «' + esc(row.username || row.email) + '» نهائياً مع صلاحياته. متابعة؟</p>' +
+            '<div class="modal-actions">' +
+            '<button id="modalCancel" class="btn btn-ghost" type="button">إلغاء</button>' +
+            '<button id="modalSave" class="btn btn-danger" type="button">حذف نهائي</button>' +
+            '</div>',
+        );
+        document.getElementById('modalCancel').addEventListener('click', closeModal);
+        document.getElementById('modalSave').addEventListener('click', async function () {
+          const btn = document.getElementById('modalSave');
+          btn.disabled = true;
+          btn.textContent = 'جارٍ الحذف...';
+          try {
+            const { error } = await supabase.rpc('admin_delete_account', { p_user_id: row.user_id });
+            if (error) {
+              throw error;
+            }
+            toast('تم حذف الحساب.', 'success');
+            closeModal();
+            await loadAccounts();
+          } catch (error) {
+            toast('فشل الحذف: ' + friendlyError(error.message), 'error');
+            btn.disabled = false;
+            btn.textContent = 'حذف نهائي';
+          }
+        });
+      }
+
+      // تحميل أولي عند فتح تبويب الحسابات أول مرة
+      const accountsTab = document.querySelector('.tab-btn[data-tab="accounts"]');
+      if (accountsTab) {
+        accountsTab.addEventListener('click', function () {
+          if (counter.textContent === '0' && list.childElementCount === 0) {
+            loadAccounts();
+          }
+        });
+      }
+
+      window.adminPanelLoadAccounts = loadAccounts;
     }
   }
 

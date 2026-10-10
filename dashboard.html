@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="data:," />
-    <title>طلبات الوصول — لوحة إدارة ATOGA</title>
+    <title>لوحة إدارة ATOGA — الإدارة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -23,7 +23,7 @@
   <body>
     <header class="topbar">
       <div>
-        <h1>طلبات الوصول</h1>
+        <h1>لوحة إدارة ATOGA</h1>
         <span class="user-email" id="userEmail">—</span>
       </div>
       <div class="topbar-actions">
@@ -33,51 +33,76 @@
     </header>
 
     <main class="content">
-      <section class="card create-card">
+      <div class="tabs" id="tabs">
+        <button type="button" class="tab-btn active" data-tab="requests">طلبات الوصول</button>
+        <button type="button" class="tab-btn" data-tab="create">إنشاء حساب</button>
+        <button type="button" class="tab-btn" data-tab="accounts">الحسابات</button>
+      </div>
+
+      <section id="tab-requests" class="tab-panel">
         <p class="section-title">
-          <span>إنشاء حساب جديد (يوزر نيم + باسورد، بدون انتظار)</span>
+          الطلبات المعلّقة
+          <span id="requestsCount" class="counter">0</span>
         </p>
-        <form id="createAccountForm" novalidate>
-          <div class="create-grid">
-            <div class="field">
-              <label for="newUsername">اسم المستخدم (يوزر نيم) *</label>
-              <input id="newUsername" class="input" type="text" autocomplete="off" placeholder="omar" required />
-            </div>
-            <div class="field">
-              <label for="newPassword">كلمة المرور * (6 أحرف على الأقل)</label>
-              <input id="newPassword" class="input" type="text" autocomplete="off" minlength="6" required />
-            </div>
-            <div class="field">
-              <label for="newRole">الدور</label>
-              <select id="newRole" class="input">
-                <option value="manager">مدير (Manager)</option>
-                <option value="marketer">مسوّق (Marketer)</option>
-                <option value="driver">سائق (Driver)</option>
-                <option value="packager">معبئ (Packager)</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="newName">الاسم الكامل (اختياري)</label>
-              <input id="newName" class="input" type="text" autocomplete="off" />
-            </div>
-            <div class="field">
-              <label for="newPhone">رقم الهاتف (اختياري)</label>
-              <input id="newPhone" class="input" type="tel" autocomplete="off" />
-            </div>
-          </div>
-          <button id="createAccountBtn" class="btn btn-primary" type="submit">إنشاء الحساب</button>
-          <p class="create-hint">
-            يُفعَّل الحساب فوراً ويمكن تسليمه للمستخدم مباشرة: يفتح تطبيق مانجر بـ اسم المستخدم وكلمة المرور دون أي طلب.
-          </p>
-        </form>
+        <div id="requestsList"></div>
       </section>
 
-      <p class="section-title">
-        الطلبات المعلّقة
-        <span id="requestsCount" class="counter">0</span>
-      </p>
-      <div id="requestsList"></div>
+      <section id="tab-create" class="tab-panel hidden">
+        <div class="card create-card">
+          <p class="section-title">
+            <span>إنشاء حساب جديد (يوزر نيم + باسورد، بدون انتظار)</span>
+          </p>
+          <form id="createAccountForm" novalidate>
+            <div class="create-grid">
+              <div class="field">
+                <label for="newUsername">اسم المستخدم (يوزر نيم) *</label>
+                <input id="newUsername" class="input" type="text" autocomplete="off" placeholder="omar" required />
+              </div>
+              <div class="field">
+                <label for="newPassword">كلمة المرور * (6 أحرف على الأقل)</label>
+                <input id="newPassword" class="input" type="text" autocomplete="off" minlength="6" required />
+              </div>
+              <div class="field">
+                <label for="newRole">الدور</label>
+                <select id="newRole" class="input">
+                  <option value="manager">مدير (Manager)</option>
+                  <option value="marketer">مسوّق (Marketer)</option>
+                  <option value="driver">سائق (Driver)</option>
+                  <option value="packager">معبئ (Packager)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="newName">الاسم الكامل (اختياري)</label>
+                <input id="newName" class="input" type="text" autocomplete="off" />
+              </div>
+              <div class="field">
+                <label for="newPhone">رقم الهاتف (اختياري)</label>
+                <input id="newPhone" class="input" type="tel" autocomplete="off" />
+              </div>
+            </div>
+            <button id="createAccountBtn" class="btn btn-primary" type="submit">إنشاء الحساب</button>
+            <p class="create-hint">
+              يُفعَّل الحساب فوراً ويمكن تسليمه للمستخدم مباشرة: يفتح تطبيق مانجر بـ اسم المستخدم وكلمة المرور دون أي طلب.
+            </p>
+          </form>
+        </div>
+      </section>
+
+      <section id="tab-accounts" class="tab-panel hidden">
+        <p class="section-title">
+          جميع الحسابات
+          <span id="accountsCount" class="counter">0</span>
+        </p>
+        <div id="accountsList"></div>
+        <p class="create-hint">
+          الحساب الرئيسي (dirayalab@gmail.com) محمي: لا يُحذف ولا يُجمّد ولا يتغير اسم دخوله.
+        </p>
+      </section>
     </main>
+
+    <div id="modalOverlay" class="modal-overlay hidden">
+      <div class="modal" id="modalBox"></div>
+    </div>
 
     <script src="config.js"></script>
     <script src="app.js"></script>
