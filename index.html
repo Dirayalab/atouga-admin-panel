@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:," />
+    <title>لوحة إدارة ATOGA — دخول المدير العام</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: { DEFAULT: '#107275', dark: '#0B5759', light: '#2E9A9C' },
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="auth-shell">
+      <section class="card">
+        <div class="brand-badge">A</div>
+        <h1>لوحة إدارة ATOGA</h1>
+        <p class="subtitle">الدخول مقصور على المدير العام (Super Admin)</p>
+
+        <div id="errorBox" class="error-box"></div>
+
+        <form id="loginForm" novalidate>
+          <div class="field">
+            <label for="email">البريد الإلكتروني</label>
+            <input
+              id="email"
+              class="input"
+              type="email"
+              inputmode="email"
+              autocomplete="username"
+              placeholder="admin@example.com"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="password">كلمة المرور</label>
+            <input
+              id="password"
+              class="input"
+              type="password"
+              autocomplete="current-password"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <button id="submitBtn" class="btn btn-primary" type="submit">
+            <span id="submitText">تسجيل الدخول</span>
+            <span id="submitSpinner" class="spinner" style="display: none"></span>
+          </button>
+        </form>
+      </section>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script>
+      adminPanel.initLogin();
+    </script>
+  </body>
+</html>

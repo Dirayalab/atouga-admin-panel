@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:," />
+    <title>طلبات الوصول — لوحة إدارة ATOGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: { DEFAULT: '#107275', dark: '#0B5759', light: '#2E9A9C' },
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>طلبات الوصول</h1>
+        <span class="user-email" id="userEmail">—</span>
+      </div>
+      <div class="topbar-actions">
+        <button id="refreshBtn" class="btn btn-ghost" type="button">تحديث</button>
+        <button id="logoutBtn" class="btn btn-danger" type="button">تسجيل الخروج</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <p class="section-title">
+        الطلبات المعلّقة
+        <span id="requestsCount" class="counter">0</span>
+      </p>
+      <div id="requestsList"></div>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script>
+      adminPanel.initDashboard();
+    </script>
+  </body>
+</html>
