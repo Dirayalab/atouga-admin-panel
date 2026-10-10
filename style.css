@@ -242,6 +242,23 @@ h1 {
   word-break: break-all;
 }
 
+.create-card {
+  max-width: none;
+  margin-bottom: 24px;
+}
+
+.create-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0 14px;
+}
+
+.create-hint {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
 .request-date {
   color: var(--muted);
   font-size: 13px;
@@ -335,6 +352,10 @@ h1 {
 }
 
 @media (max-width: 560px) {
+  .create-grid {
+    grid-template-columns: 1fr;
+  }
+
   .request-row {
     flex-direction: column;
     align-items: stretch;

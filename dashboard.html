@@ -33,6 +33,45 @@
     </header>
 
     <main class="content">
+      <section class="card create-card">
+        <p class="section-title">
+          <span>إنشاء حساب جديد (بدون انتظار)</span>
+        </p>
+        <form id="createAccountForm" novalidate>
+          <div class="create-grid">
+            <div class="field">
+              <label for="newEmail">البريد الإلكتروني (اسم المستخدم) *</label>
+              <input id="newEmail" class="input" type="email" inputmode="email" autocomplete="off" required />
+            </div>
+            <div class="field">
+              <label for="newPassword">كلمة المرور * (6 أحرف على الأقل)</label>
+              <input id="newPassword" class="input" type="text" autocomplete="off" minlength="6" required />
+            </div>
+            <div class="field">
+              <label for="newRole">الدور</label>
+              <select id="newRole" class="input">
+                <option value="manager">مدير (Manager)</option>
+                <option value="marketer">مسوّق (Marketer)</option>
+                <option value="driver">سائق (Driver)</option>
+                <option value="packager">معبئ (Packager)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="newName">الاسم الكامل (اختياري)</label>
+              <input id="newName" class="input" type="text" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="newPhone">رقم الهاتف (اختياري)</label>
+              <input id="newPhone" class="input" type="tel" autocomplete="off" />
+            </div>
+          </div>
+          <button id="createAccountBtn" class="btn btn-primary" type="submit">إنشاء الحساب</button>
+          <p class="create-hint">
+            يُفعَّل الحساب فوراً ويمكن تسليمه للمستخدم مباشرة (يدخل إلى تطبيق مانجر دون أي طلب).
+          </p>
+        </form>
+      </section>
+
       <p class="section-title">
         الطلبات المعلّقة
         <span id="requestsCount" class="counter">0</span>

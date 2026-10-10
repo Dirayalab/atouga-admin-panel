@@ -157,6 +157,8 @@
       return;
     }
 
+    initCreateAccount();
+
     (async function () {
       const session = await requireSuperAdmin();
       if (!session) {
@@ -165,6 +167,49 @@
       emailEl.textContent = session.user.email || '';
       await loadRequests();
     })();
+
+    function initCreateAccount() {
+      const form = document.getElementById('createAccountForm');
+      const btn = document.getElementById('createAccountBtn');
+      if (!form || !btn) {
+        return;
+      }
+      form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const email = document.getElementById('newEmail').value.trim();
+        const password = document.getElementById('newPassword').value;
+        if (!email || password.length < 6) {
+          toast('أدخل بريداً صالحاً وكلمة مرور (6 أحرف على الأقل).', 'error');
+          return;
+        }
+        btn.disabled = true;
+        btn.textContent = 'جارٍ الإنشاء...';
+        try {
+          const { data, error } = await supabase.functions.invoke('admin-create-user', {
+            body: {
+              email: email,
+              password: password,
+              role: document.getElementById('newRole').value,
+              full_name: document.getElementById('newName').value.trim() || undefined,
+              phone: document.getElementById('newPhone').value.trim() || undefined,
+            },
+          });
+          if (error) {
+            throw error;
+          }
+          if (data && data.error) {
+            throw new Error(data.error);
+          }
+          toast('تم إنشاء الحساب: ' + data.email + ' (' + data.role + ')', 'success');
+          form.reset();
+        } catch (error) {
+          toast('فشل إنشاء الحساب: ' + friendlyError(error.message), 'error');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'إنشاء الحساب';
+        }
+      });
+    }
 
     refreshBtn.addEventListener('click', loadRequests);
     logoutBtn.addEventListener('click', async function () {
