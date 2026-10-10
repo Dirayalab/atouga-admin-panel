@@ -289,6 +289,27 @@ h1 {
   display: none !important;
 }
 
+/* مبدّل اللغة مع الأعلام */
+.lang-switch button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lang-switch button.active {
+  border-color: var(--brand);
+  color: var(--brand);
+  font-weight: 800;
+}
+
+.flag-icon {
+  width: 20px;
+  height: 14px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
 /* بطاقات الحسابات */
 .account-card {
   background: var(--surface);
