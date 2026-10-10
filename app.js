@@ -66,15 +66,15 @@
   function friendlyError(message) {
     const msg = String(message || '');
     if (/invalid login credentials|invalid_grant|invalid_credentials/i.test(msg)) {
-      return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+      return window.I18N ? window.I18N.t('invalidUser') : 'اسم المستخدم أو كلمة المرور غير صحيحة.';
     }
     if (/email_not_confirmed|email not confirmed/i.test(msg)) {
-      return 'يرجى تأكيد البريد الإلكتروني أولاً.';
+      return window.I18N ? window.I18N.t('emailNotConfirmed') : 'يرجى تأكيد البريد الإلكتروني أولاً.';
     }
     if (/Failed to fetch|NetworkError/i.test(msg)) {
-      return 'تعذّر الاتصال بالخادم. تحقق من الشبكة.';
+      return window.I18N ? window.I18N.t('networkError') : 'تعذّر الاتصال بالخادم. تحقق من الشبكة.';
     }
-    return msg || 'حدث خطأ غير متوقع.';
+    return msg || (window.I18N ? window.I18N.t('unexpectedError') : 'حدث خطأ غير متوقع.');
   }
 
   /** يستخرج رسالة الخطأ المحددة من استجابة Edge Function غير الناجحة. */
@@ -257,13 +257,21 @@
           if (data && data.error) {
             throw new Error(data.error);
           }
-          toast('تم إنشاء الحساب: ' + data.username + ' (' + data.role + ')', 'success');
+          toast(
+            window.I18N
+              ? window.I18N.t('accountCreated', data.username, data.role)
+              : 'تم إنشاء الحساب: ' + data.username + ' (' + data.role + ')',
+            'success',
+          );
           form.reset();
           if (typeof window.adminPanelLoadAccounts === 'function') {
             window.adminPanelLoadAccounts();
           }
         } catch (error) {
-          toast('فشل إنشاء الحساب: ' + extractEdgeError(error), 'error');
+          toast(
+            (window.I18N ? window.I18N.t('cantCreate') : 'فشل إنشاء الحساب') + ': ' + extractEdgeError(error),
+            'error',
+          );
         } finally {
           btn.disabled = false;
           btn.textContent = (window.I18N ? window.I18N.t('createBtn') : 'إنشاء الحساب');
@@ -278,6 +286,16 @@
           ? window.adminPanelLoadAccounts().catch(function () {})
           : Promise.resolve(),
       ]);
+    });
+
+    // إعادة رسم القوائم عند تغيير اللغة.
+    document.addEventListener('i18n:changed', function () {
+      if (list && list.children.length > 0) {
+        loadRequests().catch(function () {});
+      }
+      if (typeof window.adminPanelLoadAccounts === 'function') {
+        window.adminPanelLoadAccounts().catch(function () {});
+      }
     });
     logoutBtn.addEventListener('click', async function () {
       await supabase.auth.signOut();
@@ -347,7 +365,9 @@
       email.textContent = row.email;
       const date = document.createElement('div');
       date.className = 'request-date';
-        date.textContent = 'تاريخ الطلب: ' + formatDate(row.requested_at);
+      date.textContent = window.I18N
+        ? window.I18N.t('requestedAt', formatDate(row.requested_at))
+        : 'تاريخ الطلب: ' + formatDate(row.requested_at);
       info.appendChild(email);
       info.appendChild(date);
 
@@ -405,22 +425,26 @@
         card.remove();
         toast(
           role
-            ? 'تم اعتماد الطلب كـ' + (role === 'manager' ? 'مدير' : 'مسوّق') + '.'
-            : 'تم رفض الطلب.',
+            ? window.I18N
+              ? window.I18N.t(role === 'manager' ? 'requestApprovedManager' : 'requestApprovedMarketer')
+              : 'تم اعتماد الطلب.'
+            : window.I18N
+              ? window.I18N.t('requestRejected')
+              : 'تم رفض الطلب.',
           'success',
         );
         if (list.children.length === 0) {
           const div = document.createElement('div');
           div.className = 'empty-state';
-          div.textContent = 'لا توجد طلبات معلّقة حالياً.';
+          div.textContent = window.I18N ? window.I18N.t('noPending') : 'لا توجد طلبات معلّقة حالياً.';
           list.appendChild(div);
         }
       } catch (error) {
         buttons.forEach(function (b) {
           b.disabled = false;
         });
-        btn.textContent = btn.dataset.label || 'إعادة المحاولة';
-        toast('فشلت العملية: ' + friendlyError(error.message), 'error');
+        btn.textContent = btn.dataset.label || (window.I18N ? window.I18N.t('retry') : 'إعادة المحاولة');
+        toast((window.I18N ? window.I18N.t('operationFailed') : 'فشلت العملية') + ': ' + friendlyError(error.message), 'error');
       }
     }
 
@@ -476,7 +500,7 @@
         list.innerHTML = '';
         const loading = document.createElement('div');
         loading.className = 'loading';
-        loading.textContent = 'جارٍ تحميل الحسابات...';
+        loading.textContent = window.I18N ? window.I18N.t('loadingAccounts') : 'جارٍ تحميل الحسابات...';
         list.appendChild(loading);
         try {
           const { data, error } = await supabase.rpc('admin_list_staff');
@@ -488,9 +512,9 @@
           list.innerHTML = '';
           const div = document.createElement('div');
           div.className = 'empty-state';
-          div.textContent = 'تعذّر تحميل الحسابات: ' + friendlyError(error.message);
+          div.textContent = (window.I18N ? window.I18N.t('cantLoadAccounts') : 'تعذّر تحميل الحسابات') + ': ' + friendlyError(error.message);
           list.appendChild(div);
-          toast('تعذّر تحميل الحسابات', 'error');
+          toast(window.I18N ? window.I18N.t('cantLoadAccounts') : 'تعذّر تحميل الحسابات', 'error');
         }
       }
 
@@ -500,7 +524,7 @@
         if (rows.length === 0) {
           const div = document.createElement('div');
           div.className = 'empty-state';
-          div.textContent = 'لا توجد حسابات بعد.';
+          div.textContent = window.I18N ? window.I18N.t('noAccounts') : 'لا توجد حسابات بعد.';
           list.appendChild(div);
           return;
         }
@@ -600,34 +624,34 @@
           })
           .join('');
         const roleField = primary
-          ? '<p class="create-hint">دور الحساب الرئيسي ثابت.</p>'
+          ? '<p class="create-hint">' + (window.I18N ? window.I18N.t('primaryRoleFixed') : 'دور الحساب الرئيسي ثابت.') + '</p>'
           : '<select id="editRole" class="input">' + options + '</select>';
         openModal(
-          '<h3 class="modal-title">تعديل الحساب</h3>' +
+          '<h3 class="modal-title">' + (window.I18N ? window.I18N.t('modalEditTitle') : 'تعديل الحساب') + '</h3>' +
             '<div class="modal-body">' +
-            '<div class="field"><label for="editUsername">اسم المستخدم</label>' +
+            '<div class="field"><label for="editUsername">' + (window.I18N ? window.I18N.t('editUsername') : 'اسم المستخدم') + '</label>' +
             '<input id="editUsername" class="input" value="' + esc(row.username || '') + '"' + (primary ? ' readonly' : '') + ' /></div>' +
-            '<div class="field"><label for="editName">الاسم الكامل</label>' +
+            '<div class="field"><label for="editName">' + (window.I18N ? window.I18N.t('editName') : 'الاسم الكامل') + '</label>' +
             '<input id="editName" class="input" value="' + esc(row.full_name || '') + '" /></div>' +
-            '<div class="field"><label for="editPhone">رقم الهاتف</label>' +
+            '<div class="field"><label for="editPhone">' + (window.I18N ? window.I18N.t('editPhone') : 'رقم الهاتف') + '</label>' +
             '<input id="editPhone" class="input" value="' + esc(row.phone || '') + '" /></div>' +
-            '<div class="field"><label for="editRole">الدور</label>' + roleField + '</div>' +
+            '<div class="field"><label for="editRole">' + (window.I18N ? window.I18N.t('editRole') : 'الدور') + '</label>' + roleField + '</div>' +
             '</div>' +
             '<div class="modal-actions">' +
-            '<button id="modalCancel" class="btn btn-ghost" type="button">إلغاء</button>' +
-            '<button id="modalSave" class="btn btn-primary" type="button">حفظ</button>' +
+            '<button id="modalCancel" class="btn btn-ghost" type="button">' + (window.I18N ? window.I18N.t('modalCancel') : 'إلغاء') + '</button>' +
+            '<button id="modalSave" class="btn btn-primary" type="button">' + (window.I18N ? window.I18N.t('modalSave') : 'حفظ') + '</button>' +
             '</div>',
         );
         document.getElementById('modalCancel').addEventListener('click', closeModal);
         document.getElementById('modalSave').addEventListener('click', async function () {
           const username = document.getElementById('editUsername').value.trim();
           if (!USERNAME_RE.test(username)) {
-            toast('اسم المستخدم: 3-30 حرفاً (حروف/أرقام/نقطة/شرطة) فقط.', 'error');
+            toast(window.I18N ? window.I18N.t('usernameInvalid') : 'اسم المستخدم: 3-30 حرفاً (حروف/أرقام/نقطة/شرطة) فقط.', 'error');
             return;
           }
           const save = document.getElementById('modalSave');
           save.disabled = true;
-          save.textContent = 'حفظ...';
+          save.textContent = window.I18N ? window.I18N.t('saving') : 'حفظ...';
           try {
             const { error } = await supabase.rpc('admin_update_account', {
               p_user_id: row.user_id,
@@ -639,30 +663,30 @@
             if (error) {
               throw error;
             }
-            toast('تم حفظ التعديلات.', 'success');
+            toast(window.I18N ? window.I18N.t('savedChanges') : 'تم حفظ التعديلات.', 'success');
             closeModal();
             await loadAccounts();
           } catch (error) {
-            toast('فشل التعديل: ' + friendlyError(error.message), 'error');
+            toast((window.I18N ? window.I18N.t('cantEdit') : 'فشل التعديل') + ': ' + friendlyError(error.message), 'error');
             save.disabled = false;
-            save.textContent = 'حفظ';
+            save.textContent = window.I18N ? window.I18N.t('modalSave') : 'حفظ';
           }
         });
       }
 
       function openPasswordModal(row) {
         openModal(
-          '<h3 class="modal-title">تغيير كلمة المرور</h3>' +
-            '<p class="create-hint">الحساب: ' + esc(row.username || row.email) + '</p>' +
+          '<h3 class="modal-title">' + (window.I18N ? window.I18N.t('modalChangePassword') : 'تغيير كلمة المرور') + '</h3>' +
+            '<p class="create-hint">' + (window.I18N && window.I18N.getLang() === 'fr' ? 'Compte' : 'الحساب') + ': ' + esc(row.username || row.email) + '</p>' +
             '<div class="modal-body">' +
-            '<div class="field"><label for="pwdNew">كلمة المرور الجديدة</label>' +
+            '<div class="field"><label for="pwdNew">' + (window.I18N ? window.I18N.t('pwdNew') : 'كلمة المرور الجديدة') + '</label>' +
             '<input id="pwdNew" class="input" type="text" autocomplete="off" /></div>' +
-            '<div class="field"><label for="pwdConfirm">تأكيد كلمة المرور</label>' +
+            '<div class="field"><label for="pwdConfirm">' + (window.I18N ? window.I18N.t('pwdConfirm') : 'تأكيد كلمة المرور') + '</label>' +
             '<input id="pwdConfirm" class="input" type="text" autocomplete="off" /></div>' +
             '</div>' +
             '<div class="modal-actions">' +
-            '<button id="modalCancel" class="btn btn-ghost" type="button">إلغاء</button>' +
-            '<button id="modalSave" class="btn btn-primary" type="button">تغيير كلمة المرور</button>' +
+            '<button id="modalCancel" class="btn btn-ghost" type="button">' + (window.I18N ? window.I18N.t('modalCancel') : 'إلغاء') + '</button>' +
+            '<button id="modalSave" class="btn btn-primary" type="button">' + (window.I18N ? window.I18N.t('modalChangePassword') : 'تغيير كلمة المرور') + '</button>' +
             '</div>',
         );
         document.getElementById('modalCancel').addEventListener('click', closeModal);
@@ -670,16 +694,16 @@
           const password = document.getElementById('pwdNew').value;
           const confirm = document.getElementById('pwdConfirm').value;
           if (password.length < 6) {
-            toast('كلمة المرور 6 أحرف على الأقل.', 'error');
+            toast(window.I18N ? window.I18N.t('passwordMin') : 'كلمة المرور 6 أحرف على الأقل.', 'error');
             return;
           }
           if (password !== confirm) {
-            toast('كلمتا المرور غير متطابقتين.', 'error');
+            toast(window.I18N ? window.I18N.t('pwdMismatch') : 'كلمتا المرور غير متطابقتين.', 'error');
             return;
           }
           const save = document.getElementById('modalSave');
           save.disabled = true;
-          save.textContent = 'جارٍ التغيير...';
+          save.textContent = window.I18N ? window.I18N.t('changing') : 'جارٍ التغيير...';
           try {
             const { data, error } = await supabase.functions.invoke('admin-manage-user', {
               body: { action: 'password', user_id: row.user_id, new_password: password },
@@ -690,12 +714,12 @@
             if (data && data.error) {
               throw new Error(data.error);
             }
-            toast('تم تغيير كلمة المرور.', 'success');
+            toast(window.I18N ? window.I18N.t('pwdChanged') : 'تم تغيير كلمة المرور.', 'success');
             closeModal();
           } catch (error) {
-            toast('فشل تغيير كلمة المرور: ' + extractEdgeError(error), 'error');
+            toast((window.I18N ? window.I18N.t('cantChangePwd') : 'فشل تغيير كلمة المرور') + ': ' + extractEdgeError(error), 'error');
             save.disabled = false;
-            save.textContent = 'تغيير كلمة المرور';
+            save.textContent = window.I18N ? window.I18N.t('modalChangePassword') : 'تغيير كلمة المرور';
           }
         });
       }
@@ -712,36 +736,40 @@
             loadAccounts();
           })
           .catch(function (error) {
-            toast('فشلت العملية: ' + friendlyError(error.message), 'error');
+            toast((window.I18N ? window.I18N.t('operationFailed') : 'فشلت العملية') + ': ' + friendlyError(error.message), 'error');
           });
       }
 
       function confirmDelete(row) {
         openModal(
-          '<h3 class="modal-title">حذف الحساب</h3>' +
-            '<p class="modal-text">سيُحذف الحساب «' + esc(row.username || row.email) + '» نهائياً مع صلاحياته. متابعة؟</p>' +
+          '<h3 class="modal-title">' + (window.I18N ? window.I18N.t('modalDelete') : 'حذف الحساب') + '</h3>' +
+            '<p class="modal-text">' +
+            (window.I18N
+              ? window.I18N.t('deleteConfirm', esc(row.username || row.email))
+              : 'سيُحذف الحساب «' + esc(row.username || row.email) + '» نهائياً مع صلاحياته. متابعة؟') +
+            '</p>' +
             '<div class="modal-actions">' +
-            '<button id="modalCancel" class="btn btn-ghost" type="button">إلغاء</button>' +
-            '<button id="modalSave" class="btn btn-danger" type="button">حذف نهائي</button>' +
+            '<button id="modalCancel" class="btn btn-ghost" type="button">' + (window.I18N ? window.I18N.t('modalCancel') : 'إلغاء') + '</button>' +
+            '<button id="modalSave" class="btn btn-danger" type="button">' + (window.I18N ? window.I18N.t('delete') : 'حذف') + '</button>' +
             '</div>',
         );
         document.getElementById('modalCancel').addEventListener('click', closeModal);
         document.getElementById('modalSave').addEventListener('click', async function () {
           const btn = document.getElementById('modalSave');
           btn.disabled = true;
-          btn.textContent = 'جارٍ الحذف...';
+          btn.textContent = window.I18N ? window.I18N.t('deleting') : 'جارٍ الحذف...';
           try {
             const { error } = await supabase.rpc('admin_delete_account', { p_user_id: row.user_id });
             if (error) {
               throw error;
             }
-            toast('تم حذف الحساب.', 'success');
+            toast(window.I18N ? window.I18N.t('accountDeleted') : 'تم حذف الحساب.', 'success');
             closeModal();
             await loadAccounts();
           } catch (error) {
-            toast('فشل الحذف: ' + friendlyError(error.message), 'error');
+            toast((window.I18N ? window.I18N.t('cantDelete') : 'فشل الحذف') + ': ' + friendlyError(error.message), 'error');
             btn.disabled = false;
-            btn.textContent = 'حذف نهائي';
+            btn.textContent = window.I18N ? window.I18N.t('delete') : 'حذف';
           }
         });
       }
