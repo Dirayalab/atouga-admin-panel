@@ -31,15 +31,15 @@
   function roleLabel(role) {
     switch (role) {
       case 'super_admin':
-        return 'مدير عام';
+        return window.I18N ? window.I18N.t('roleSuperAdmin') : 'مدير عام';
       case 'manager':
-        return 'مدير';
+        return window.I18N ? window.I18N.t('roleManager') : 'مدير (Manager)';
       case 'marketer':
-        return 'مسوّق';
+        return window.I18N ? window.I18N.t('roleMarketer') : 'مسوّق (Marketer)';
       case 'driver':
-        return 'سائق';
+        return window.I18N ? window.I18N.t('roleDriver') : 'سائق (Driver)';
       case 'packager':
-        return 'معبئ';
+        return window.I18N ? window.I18N.t('rolePackager') : 'معبئ (Packager)';
       default:
         return esc(role);
     }
