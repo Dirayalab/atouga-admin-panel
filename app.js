@@ -40,6 +40,8 @@
         return window.I18N ? window.I18N.t('roleDriver') : 'سائق (Driver)';
       case 'packager':
         return window.I18N ? window.I18N.t('rolePackager') : 'معبئ (Packager)';
+      case 'driver_packager':
+        return window.I18N ? window.I18N.t('roleDriverPackager') : 'موظف (سائق ومعبئ)';
       default:
         return esc(role);
     }
