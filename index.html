@@ -24,37 +24,43 @@
     <main class="auth-shell">
       <section class="card">
         <div class="brand-badge">A</div>
-        <h1>لوحة إدارة ATOGA</h1>
-        <p class="subtitle">الدخول مقصور على المدير العام (Super Admin)</p>
+        <div class="lang-switch" style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:10px">
+          <button type="button" class="btn btn-ghost btn-sm" data-lang="ar">العربية</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-lang="fr">Français</button>
+        </div>
+        <h1 data-i18n="loginTitle">لوحة إدارة ATOGA — دخول المدير العام</h1>
+        <p class="subtitle" data-i18n="loginSubtitle">الدخول مقصور على المدير العام (Super Admin)</p>
 
         <div id="errorBox" class="error-box"></div>
 
         <form id="loginForm" novalidate>
           <div class="field">
-            <label for="email">البريد الإلكتروني</label>
+            <label for="email" data-i18n="usernameLabel">اسم المستخدم (يوزر نيم)</label>
             <input
               id="email"
               class="input"
               type="email"
               inputmode="email"
               autocomplete="username"
-              placeholder="admin@example.com"
+              data-i18n="usernamePlaceholder"
+              placeholder="أدخل اسم المستخدم"
               required
             />
           </div>
           <div class="field">
-            <label for="password">كلمة المرور</label>
+            <label for="password" data-i18n="passwordLabel">كلمة المرور</label>
             <input
               id="password"
               class="input"
               type="password"
               autocomplete="current-password"
+              data-i18n="passwordPlaceholder"
               placeholder="••••••••"
               required
             />
           </div>
           <button id="submitBtn" class="btn btn-primary" type="submit">
-            <span id="submitText">تسجيل الدخول</span>
+            <span id="submitText" data-i18n="login">تسجيل الدخول</span>
             <span id="submitSpinner" class="spinner" style="display: none"></span>
           </button>
         </form>
@@ -62,8 +68,18 @@
     </main>
 
     <script src="config.js"></script>
+    <script src="i18n.js"></script>
     <script src="app.js"></script>
     <script>
+      if (window.I18N) {
+        window.I18N.apply();
+        document.querySelectorAll('.lang-switch button').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            window.I18N.setLang(btn.dataset.lang);
+            window.I18N.apply();
+          });
+        });
+      }
       adminPanel.initLogin();
     </script>
   </body>

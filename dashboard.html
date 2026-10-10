@@ -22,26 +22,30 @@
   </head>
   <body>
     <header class="topbar">
-      <div>
-        <h1>لوحة إدارة ATOGA</h1>
-        <span class="user-email" id="userEmail">—</span>
-      </div>
-      <div class="topbar-actions">
-        <button id="refreshBtn" class="btn btn-ghost" type="button">تحديث</button>
-        <button id="logoutBtn" class="btn btn-danger" type="button">تسجيل الخروج</button>
-      </div>
+        <div>
+          <h1 data-i18n="dashboardTitle">لوحة إدارة ATOGA</h1>
+          <span class="user-email" id="userEmail">—</span>
+        </div>
+        <div class="topbar-actions">
+          <div class="lang-switch" style="display:flex;gap:6px">
+            <button type="button" class="btn btn-ghost btn-sm" data-lang="ar">العربية</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-lang="fr">Français</button>
+          </div>
+          <button id="refreshBtn" class="btn btn-ghost" type="button" data-i18n="refresh">تحديث</button>
+          <button id="logoutBtn" class="btn btn-danger" type="button" data-i18n="logout">تسجيل الخروج</button>
+        </div>
     </header>
 
     <main class="content">
       <div class="tabs" id="tabs">
-        <button type="button" class="tab-btn active" data-tab="requests">طلبات الوصول</button>
-        <button type="button" class="tab-btn" data-tab="create">إنشاء حساب</button>
-        <button type="button" class="tab-btn" data-tab="accounts">الحسابات</button>
+        <button type="button" class="tab-btn active" data-tab="requests" data-i18n="requestsTab">طلبات الوصول</button>
+        <button type="button" class="tab-btn" data-tab="create" data-i18n="createTab">إنشاء حساب</button>
+        <button type="button" class="tab-btn" data-tab="accounts" data-i18n="accountsTab">الحسابات</button>
       </div>
 
       <section id="tab-requests" class="tab-panel">
         <p class="section-title">
-          الطلبات المعلّقة
+          <span data-i18n="requestsPending">الطلبات المعلّقة</span>
           <span id="requestsCount" class="counter">0</span>
         </p>
         <div id="requestsList"></div>
@@ -50,38 +54,38 @@
       <section id="tab-create" class="tab-panel hidden">
         <div class="card create-card">
           <p class="section-title">
-            <span>إنشاء حساب جديد (يوزر نيم + باسورد، بدون انتظار)</span>
+            <span data-i18n="createTitle">إنشاء حساب جديد (يوزر نيم + باسورد، بدون انتظار)</span>
           </p>
           <form id="createAccountForm" novalidate>
             <div class="create-grid">
               <div class="field">
-                <label for="newUsername">اسم المستخدم (يوزر نيم) *</label>
+                <label for="newUsername" data-i18n="usernameCreate">اسم المستخدم (يوزر نيم) *</label>
                 <input id="newUsername" class="input" type="text" autocomplete="off" placeholder="omar" required />
               </div>
               <div class="field">
-                <label for="newPassword">كلمة المرور * (6 أحرف على الأقل)</label>
+                <label for="newPassword" data-i18n="passwordCreate">كلمة المرور * (6 أحرف على الأقل)</label>
                 <input id="newPassword" class="input" type="text" autocomplete="off" minlength="6" required />
               </div>
               <div class="field">
-                <label for="newRole">الدور</label>
+                <label for="newRole" data-i18n="roleLabel">الدور</label>
                 <select id="newRole" class="input">
-                  <option value="manager">مدير (Manager)</option>
-                  <option value="marketer">مسوّق (Marketer)</option>
-                  <option value="driver">سائق (Driver)</option>
-                  <option value="packager">معبئ (Packager)</option>
+                  <option value="manager" data-i18n="roleManager">مدير (Manager)</option>
+                  <option value="marketer" data-i18n="roleMarketer">مسوّق (Marketer)</option>
+                  <option value="driver" data-i18n="roleDriver">سائق (Driver)</option>
+                  <option value="packager" data-i18n="rolePackager">معبئ (Packager)</option>
                 </select>
               </div>
               <div class="field">
-                <label for="newName">الاسم الكامل (اختياري)</label>
+                <label for="newName" data-i18n="fullNameOptional">الاسم الكامل (اختياري)</label>
                 <input id="newName" class="input" type="text" autocomplete="off" />
               </div>
               <div class="field">
-                <label for="newPhone">رقم الهاتف (اختياري)</label>
+                <label for="newPhone" data-i18n="phoneOptional">رقم الهاتف (اختياري)</label>
                 <input id="newPhone" class="input" type="tel" autocomplete="off" />
               </div>
             </div>
-            <button id="createAccountBtn" class="btn btn-primary" type="submit">إنشاء الحساب</button>
-            <p class="create-hint">
+            <button id="createAccountBtn" class="btn btn-primary" type="submit" data-i18n="createBtn">إنشاء الحساب</button>
+            <p class="create-hint" data-i18n="createHint">
               يُفعَّل الحساب فوراً ويمكن تسليمه للمستخدم مباشرة: يفتح تطبيق مانجر بـ اسم المستخدم وكلمة المرور دون أي طلب.
             </p>
           </form>
@@ -90,11 +94,11 @@
 
       <section id="tab-accounts" class="tab-panel hidden">
         <p class="section-title">
-          جميع الحسابات
+          <span data-i18n="accountsAll">جميع الحسابات</span>
           <span id="accountsCount" class="counter">0</span>
         </p>
         <div id="accountsList"></div>
-        <p class="create-hint">
+        <p class="create-hint" data-i18n="protectedNote">
           الحساب الرئيسي (dirayalab@gmail.com) محمي: لا يُحذف ولا يُجمّد ولا يتغير اسم دخوله.
         </p>
       </section>
@@ -105,8 +109,18 @@
     </div>
 
     <script src="config.js"></script>
+    <script src="i18n.js"></script>
     <script src="app.js"></script>
     <script>
+      if (window.I18N) {
+        window.I18N.apply();
+        document.querySelectorAll('.lang-switch button').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            window.I18N.setLang(btn.dataset.lang);
+            window.I18N.apply();
+          });
+        });
+      }
       adminPanel.initDashboard();
     </script>
   </body>

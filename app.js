@@ -142,9 +142,9 @@
 
     const params = new URLSearchParams(window.location.search);
     if (params.get('error') === 'denied') {
-      showError('Access denied. Employees must use the Fulfillment App.');
+      showError(window.I18N ? window.I18N.t('accessDeniedPanel') : 'Access denied. Only a Super Admin can access this panel.');
     } else if (params.get('error') === 'session') {
-      showError('انتهت الجلسة. سجّل الدخول من جديد.');
+      showError(window.I18N ? window.I18N.t('sessionExpired') : 'انتهت الجلسة. سجّل الدخول من جديد.');
     }
 
     function showError(message) {
@@ -154,7 +154,9 @@
 
     function setLoading(loading) {
       submit.disabled = loading;
-      submitText.textContent = loading ? 'جارٍ تسجيل الدخول...' : 'تسجيل الدخول';
+      submitText.textContent = loading
+        ? (window.I18N ? window.I18N.t('loadingLogin') || 'جارٍ تسجيل الدخول...' : 'جارٍ تسجيل الدخول...')
+        : (window.I18N ? window.I18N.t('login') : 'تسجيل الدخول');
       spinner.style.display = loading ? '' : 'none';
     }
 
@@ -164,7 +166,7 @@
       const emailValue = email.value.trim();
       const passwordValue = password.value;
       if (!emailValue || !passwordValue) {
-        showError('أدخل البريد الإلكتروني وكلمة المرور.');
+        showError(window.I18N ? window.I18N.t('invalidUser') : 'اسم المستخدم أو كلمة المرور غير صحيحة.');
         return;
       }
       setLoading(true);
@@ -182,7 +184,7 @@
         }
         if (role !== 'super_admin') {
           await supabase.auth.signOut();
-          showError('Access denied. Only a Super Admin can access this panel.');
+          showError(window.I18N ? window.I18N.t('accessDeniedPanel') : 'Access denied. Only a Super Admin can access this panel.');
           return;
         }
         window.location.replace('dashboard.html');
@@ -228,16 +230,17 @@
         event.preventDefault();
         const username = document.getElementById('newUsername').value.trim();
         const password = document.getElementById('newPassword').value;
-        if (!USERNAME_RE.test(username) && !EMAIL_RE.test(username)) {
-          toast('اسم المستخدم: 3-30 حرفاً (حروف/أرقام/نقطة/شرطة) فقط.', 'error');
-          return;
-        }
-        if (password.length < 6) {
-          toast('كلمة المرور 6 أحرف على الأقل.', 'error');
-          return;
-        }
-        btn.disabled = true;
-        btn.textContent = 'جارٍ الإنشاء...';
+          if (!USERNAME_RE.test(username) && !EMAIL_RE.test(username)) {
+            toast(window.I18N ? window.I18N.t('usernameInvalid') : 'اسم المستخدم: 3-30 حرفاً (حروف/أرقام/نقطة/شرطة) فقط.', 'error');
+            return;
+          }
+          if (password.length < 6) {
+            toast(window.I18N ? window.I18N.t('passwordMin') : 'كلمة المرور 6 أحرف على الأقل.', 'error');
+            return;
+          }
+          btn.disabled = true;
+          const I18 = window.I18N;
+          btn.textContent = I18 ? I18.t('creating') || 'جارٍ الإنشاء...' : 'جارٍ الإنشاء...';
         try {
           const { data, error } = await supabase.functions.invoke('admin-create-user', {
             body: {
@@ -263,7 +266,7 @@
           toast('فشل إنشاء الحساب: ' + extractEdgeError(error), 'error');
         } finally {
           btn.disabled = false;
-          btn.textContent = 'إنشاء الحساب';
+          btn.textContent = (window.I18N ? window.I18N.t('createBtn') : 'إنشاء الحساب');
         }
       });
     }
@@ -287,7 +290,7 @@
       if (loading) {
         const div = document.createElement('div');
         div.className = 'loading';
-        div.textContent = 'جارٍ تحميل الطلبات...';
+        div.textContent = (window.I18N ? window.I18N.t('loadingRequests') : 'جارٍ تحميل الطلبات...');
         list.appendChild(div);
       }
     }
@@ -308,9 +311,9 @@
         setLoading(false);
         const div = document.createElement('div');
         div.className = 'empty-state';
-        div.textContent = 'تعذّر تحميل الطلبات: ' + friendlyError(error.message);
+        div.textContent = (window.I18N ? window.I18N.t('cantLoadRequests') : 'تعذّر تحميل الطلبات') + ': ' + friendlyError(error.message);
         list.appendChild(div);
-        toast('تعذّر تحميل الطلبات', 'error');
+        toast(window.I18N ? window.I18N.t('cantLoadRequests') : 'تعذّر تحميل الطلبات', 'error');
       }
     }
 
@@ -320,7 +323,7 @@
       if (rows.length === 0) {
         const div = document.createElement('div');
         div.className = 'empty-state';
-        div.textContent = 'لا توجد طلبات معلّقة حالياً.';
+        div.textContent = (window.I18N ? window.I18N.t('noPending') : 'لا توجد طلبات معلّقة حالياً.');
         list.appendChild(div);
         return;
       }
@@ -344,19 +347,19 @@
       email.textContent = row.email;
       const date = document.createElement('div');
       date.className = 'request-date';
-      date.textContent = 'تاريخ الطلب: ' + formatDate(row.requested_at);
+        date.textContent = 'تاريخ الطلب: ' + formatDate(row.requested_at);
       info.appendChild(email);
       info.appendChild(date);
 
       const actions = document.createElement('div');
       actions.className = 'request-actions';
-      actions.appendChild(actionButton('اعتماد كمدير', 'btn-success', async function (btn) {
+      actions.appendChild(actionButton((window.I18N ? window.I18N.t('approveManager') : 'اعتماد كمدير'), 'btn-success', async function (btn) {
         await runAction(row.id, 'manager', btn);
       }));
-      actions.appendChild(actionButton('اعتماد كمسوّق', 'btn-warning', async function (btn) {
+      actions.appendChild(actionButton((window.I18N ? window.I18N.t('approveMarketer') : 'اعتماد كمسوّق'), 'btn-warning', async function (btn) {
         await runAction(row.id, 'marketer', btn);
       }));
-      actions.appendChild(actionButton('رفض', 'btn-danger', async function (btn) {
+      actions.appendChild(actionButton(window.I18N ? window.I18N.t('reject') : 'رفض', 'btn-danger', async function (btn) {
         await runAction(row.id, null, btn);
       }));
 
@@ -551,20 +554,20 @@
 
         const actions = document.createElement('div');
         actions.className = 'request-actions';
-        actions.appendChild(ghostButton('تعديل', function () {
-          openEditModal(row);
+      actions.appendChild(ghostButton((window.I18N ? window.I18N.t('edit') : 'تعديل'), function () {
+        openEditModal(row);
+      }));
+      actions.appendChild(ghostButton((window.I18N ? window.I18N.t('changePassword') : 'كلمة المرور'), function () {
+        openPasswordModal(row);
+      }));
+      if (!primary) {
+        actions.appendChild(toneButton(row.is_active ? (window.I18N ? window.I18N.t('freeze') : 'تجميد') : (window.I18N ? window.I18N.t('unfreeze') : 'تفعيل'), row.is_active ? 'btn-warning' : 'btn-success', function () {
+          toggleFreeze(row);
         }));
-        actions.appendChild(ghostButton('كلمة المرور', function () {
-          openPasswordModal(row);
+        actions.appendChild(toneButton((window.I18N ? window.I18N.t('delete') : 'حذف'), 'btn-danger', function () {
+          confirmDelete(row);
         }));
-        if (!primary) {
-          actions.appendChild(toneButton(row.is_active ? 'تجميد' : 'تفعيل', row.is_active ? 'btn-warning' : 'btn-success', function () {
-            toggleFreeze(row);
-          }));
-          actions.appendChild(toneButton('حذف', 'btn-danger', function () {
-            confirmDelete(row);
-          }));
-        }
+      }
 
         card.appendChild(head);
         card.appendChild(actions);
@@ -705,7 +708,7 @@
             if (result.error) {
               throw result.error;
             }
-            toast(next ? 'تم تجميد الحساب.' : 'تم تفعيل الحساب.', 'success');
+            toast(next ? (window.I18N?window.I18N.t('accountFrozen'):'تم تجميد الحساب.') : (window.I18N?window.I18N.t('accountUnfrozen'):'تم تفعيل الحساب.'), 'success');
             loadAccounts();
           })
           .catch(function (error) {
