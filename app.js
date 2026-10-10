@@ -12,6 +12,7 @@
   );
 
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const USERNAME_RE = /^[a-z0-9][a-z0-9._-]{2,29}$/i;
 
   let toastContainer = null;
 
@@ -194,14 +195,14 @@
       }
       form.addEventListener('submit', async function (event) {
         event.preventDefault();
-        const email = document.getElementById('newEmail').value.trim();
+        const username = document.getElementById('newUsername').value.trim();
         const password = document.getElementById('newPassword').value;
-        if (!EMAIL_RE.test(email)) {
-          toast('يرجى إدخال بريد إلكتروني صحيح.', 'error');
+        if (!USERNAME_RE.test(username) && !EMAIL_RE.test(username)) {
+          toast('اسم المستخدم: 3-30 حرفاً (حروف/أرقام/نقطة/شرطة) فقط.', 'error');
           return;
         }
         if (password.length < 6) {
-          toast('أدخل بريداً صالحاً وكلمة مرور (6 أحرف على الأقل).', 'error');
+          toast('كلمة المرور 6 أحرف على الأقل.', 'error');
           return;
         }
         btn.disabled = true;
@@ -209,7 +210,7 @@
         try {
           const { data, error } = await supabase.functions.invoke('admin-create-user', {
             body: {
-              email: email,
+              username: username,
               password: password,
               role: document.getElementById('newRole').value,
               full_name: document.getElementById('newName').value.trim() || undefined,
@@ -222,7 +223,7 @@
           if (data && data.error) {
             throw new Error(data.error);
           }
-          toast('تم إنشاء الحساب: ' + data.email + ' (' + data.role + ')', 'success');
+          toast('تم إنشاء الحساب: ' + data.username + ' (' + data.role + ')', 'success');
           form.reset();
         } catch (error) {
           toast('فشل إنشاء الحساب: ' + extractEdgeError(error), 'error');

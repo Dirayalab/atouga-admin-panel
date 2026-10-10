@@ -35,13 +35,13 @@
     <main class="content">
       <section class="card create-card">
         <p class="section-title">
-          <span>إنشاء حساب جديد (بدون انتظار)</span>
+          <span>إنشاء حساب جديد (يوزر نيم + باسورد، بدون انتظار)</span>
         </p>
         <form id="createAccountForm" novalidate>
           <div class="create-grid">
             <div class="field">
-              <label for="newEmail">البريد الإلكتروني (اسم المستخدم) *</label>
-              <input id="newEmail" class="input" type="email" inputmode="email" autocomplete="off" required />
+              <label for="newUsername">اسم المستخدم (يوزر نيم) *</label>
+              <input id="newUsername" class="input" type="text" autocomplete="off" placeholder="omar" required />
             </div>
             <div class="field">
               <label for="newPassword">كلمة المرور * (6 أحرف على الأقل)</label>
@@ -67,7 +67,7 @@
           </div>
           <button id="createAccountBtn" class="btn btn-primary" type="submit">إنشاء الحساب</button>
           <p class="create-hint">
-            يُفعَّل الحساب فوراً ويمكن تسليمه للمستخدم مباشرة (يدخل إلى تطبيق مانجر دون أي طلب).
+            يُفعَّل الحساب فوراً ويمكن تسليمه للمستخدم مباشرة: يفتح تطبيق مانجر بـ اسم المستخدم وكلمة المرور دون أي طلب.
           </p>
         </form>
       </section>
