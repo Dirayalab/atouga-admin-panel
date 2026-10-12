@@ -1017,6 +1017,21 @@
       if (sel.toggles.delete_wallet_tx) {
         parts.push(T('walletUnit', 'حركة محفظة'));
       }
+      if (sel.toggles.delete_user_coupons) {
+        parts.push((counts.user_coupons || 0) + ' ' + T('ucUnit', 'كوبون مستخدم'));
+      }
+      if (sel.toggles.delete_coupon_redemptions) {
+        parts.push((counts.coupon_redemptions || 0) + ' ' + T('crUnit', 'سجل استهلاك'));
+      }
+      if (sel.toggles.delete_promo_banners) {
+        parts.push((counts.promo_banners || 0) + ' ' + T('bannerUnit', 'بانر'));
+      }
+      if (sel.toggles.delete_notification_campaigns) {
+        parts.push((counts.notification_campaigns || 0) + ' ' + T('campaignUnit', 'حملة'));
+      }
+      if (sel.toggles.delete_scheduled_notifications) {
+        parts.push((counts.scheduled_notifications || 0) + ' ' + T('schedUnit', 'إشعار مجدول'));
+      }
       if (sel.toggles.delete_products) {
         parts.push((counts.products || 0) + ' ' + T('productsUnit', 'منتج'));
       }
@@ -1071,6 +1086,11 @@
       toggles.appendChild(toggleRow('delete_favorites', T('groupFav', 'قوائم المفضلة'), String((counts.favorites || 0))));
       toggles.appendChild(toggleRow('delete_addresses', T('groupAddrs', 'العناوين'), String((counts.addresses || 0))));
       toggles.appendChild(toggleRow('delete_wallet_tx', T('groupWalletTx', 'حركات المحفظة'), String((counts.wallet_transactions || 0))));
+      toggles.appendChild(toggleRow('delete_user_coupons', T('groupUserCoupons', 'كوبونات المستخدمين'), String((counts.user_coupons || 0))));
+      toggles.appendChild(toggleRow('delete_coupon_redemptions', T('groupRedemptions', 'سجل استهلاك الكوبونات'), String((counts.coupon_redemptions || 0))));
+      toggles.appendChild(toggleRow('delete_promo_banners', T('groupBanners', 'البنرات'), String((counts.promo_banners || 0))));
+      toggles.appendChild(toggleRow('delete_notification_campaigns', T('groupCampaigns', 'حملات الإشعارات'), String((counts.notification_campaigns || 0))));
+      toggles.appendChild(toggleRow('delete_scheduled_notifications', T('groupScheduled', 'الإشعارات المجدولة'), String((counts.scheduled_notifications || 0))));
       toggles.appendChild(
         toggleRow('delete_products', T('groupProducts', 'المنتجات'), T('groupProductsDesc', '') + ' (' + (counts.products || 0) + ')'),
       );
@@ -1156,6 +1176,11 @@
         delete_favorites: !!sel.toggles.delete_favorites,
         delete_addresses: !!sel.toggles.delete_addresses,
         delete_wallet_tx: !!sel.toggles.delete_wallet_tx,
+        delete_user_coupons: !!sel.toggles.delete_user_coupons,
+        delete_coupon_redemptions: !!sel.toggles.delete_coupon_redemptions,
+        delete_promo_banners: !!sel.toggles.delete_promo_banners,
+        delete_notification_campaigns: !!sel.toggles.delete_notification_campaigns,
+        delete_scheduled_notifications: !!sel.toggles.delete_scheduled_notifications,
         delete_admin_requests: !!sel.toggles.delete_admin_requests,
       };
       try {
@@ -1174,6 +1199,39 @@
 
     if (refreshBtn) {
       refreshBtn.addEventListener('click', load);
+    }
+    const backupBtn = document.getElementById('cleanupBackup');
+    if (backupBtn) {
+      backupBtn.addEventListener('click', downloadBackup);
+    }
+
+    async function downloadBackup() {
+      if (!backupBtn) {
+        return;
+      }
+      backupBtn.disabled = true;
+      const old = backupBtn.textContent;
+      backupBtn.textContent = T('backupRunning', 'جارٍ التحميل...');
+      try {
+        const { data, error } = await supabase.rpc('admin_backup_snapshot');
+        if (error) {
+          throw error;
+        }
+        const blob = new Blob([JSON.stringify(data || {}, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'atoga-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+        toast(T('backupDone', 'تم تحميل النسخة الاحتياطية.'), 'success');
+      } catch (error) {
+        toast(T('backupError', 'فشل تحميل النسخة الاحتياطية') + ': ' + friendlyError(error.message), 'error');
+      } finally {
+        backupBtn.disabled = false;
+        backupBtn.textContent = old;
+      }
     }
     window.adminPanelLoadCleanup = load;
   }
