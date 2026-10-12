@@ -41,3 +41,11 @@ python -m http.server 8091 --bind 127.0.0.1
   سياسات RLS على `admin_requests` + دوال `SECURITY DEFINER` تتحقق من أن
   المستدعي `super_admin` — حماية الصفحة في المتصفح طبقة واجهة فقط وليست حاجز الأمان.
 - حال أُلغيت جلسة المدير العام، تُعاد الصفحة تلقائياً إلى `index.html`.
+
+## الوثائق — Documentation
+
+- [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) — الخدمات والمفاتيح (تلقائي) — Services & keys (auto).
+- [`docs/STRUCTURE.md`](docs/STRUCTURE.md) — بنية الملفات (تلقائي) — File structure (auto).
+- [`docs/FEATURES.md`](docs/FEATURES.md) — الميزات (يدوية) — Features (manual).
+- [`docs/ATOGA_SYSTEM_DOCUMENTATION.html`](docs/ATOGA_SYSTEM_DOCUMENTATION.html) — الوثيقة المركزية للمنظومة (عبر Pages).
+- إعادة توليد الوثائق الآلية: `powershell -File tools/generate_docs.ps1`.

@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ATOGA — التوثيق المعماري الشامل للمنظومة (مرجع إعادة البناء)</title>
+<style>
+  :root{
+    --ink:#18201c; --muted:#5c6b60; --line:#dbe6dc; --bg:#f6f8f6; --paper:#ffffff;
+    --brand:#1cb01c; --brand-d:#127a12; --brand-s:#e9f7e9;
+    --c-red:#e53935; --c-teal:#107275; --c-amber:#b45309;
+    --shadow:0 8px 28px rgba(20,60,30,.10); --r:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:"Segoe UI",Tahoma,"Noto Kufi Arabic",Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.85;font-size:15.5px}
+  .wrap{max-width:1080px;margin:0 auto;padding:26px 20px 90px}
+  /* الغلاف */
+  .cover{background:linear-gradient(135deg,#0f3d1a,#1cb01c 60%,#57d657);color:#fff;border-radius:22px;padding:52px 34px;text-align:center;box-shadow:var(--shadow);margin-bottom:26px}
+  .cover .kicker{letter-spacing:2px;font-size:12px;opacity:.85}
+  .cover h1{font-size:34px;margin:10px 0 6px;font-weight:900}
+  .cover .sub{font-size:16px;opacity:.95;max-width:760px;margin:0 auto}
+  .cover .meta{margin-top:18px;font-size:12.5px;opacity:.85;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  /* الفهرس */
+  .toc{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px 22px;margin:0 0 22px;box-shadow:var(--shadow)}
+  .toc h2{margin:0 0 10px}
+  .toc ol{margin:0;padding-inline-start:22px}
+  .toc a{color:var(--brand-d);text-decoration:none;font-weight:600}
+  .toc a:hover{text-decoration:underline}
+  h1,h2,h3,h4{line-height:1.4}
+  h2.chap{font-size:23px;border-block-end:3px solid var(--brand);padding-bottom:6px;margin-top:46px}
+  h3{font-size:18.5px;color:var(--brand-d);margin-top:28px}
+  h4{font-size:16px;margin-top:20px}
+  .paper{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:16px 20px;margin:14px 0;box-shadow:var(--shadow)}
+  .lead{font-size:16.5px;color:var(--muted)}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:right;vertical-align:top}
+  th{background:var(--brand-s)}
+  code{font-family:Consolas,"Courier New",monospace;background:#f1f5f1;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:13px;direction:ltr;unicode-bidi:embed;display:inline-block;max-width:100%;overflow:auto}
+  pre{background:#0f2316;color:#d7f5d9;border-radius:12px;padding:14px 16px;overflow:auto;direction:ltr;text-align:left;font-family:Consolas,"Courier New",monospace;font-size:12.5px;line-height:1.55;white-space:pre}
+  pre .cm{color:#7fb98a}
+  details{background:var(--paper);border:1px solid var(--line);border-radius:10px;margin:10px 0;padding:10px 14px}
+  details summary{font-weight:800;cursor:pointer;color:var(--brand-d)}
+  .note{border-inline-start:5px solid var(--c-teal);background:#eff9fa;border-radius:10px;padding:10px 14px;margin:12px 0;font-size:14px}
+  .warn{border-inline-start:5px solid var(--c-amber);background:#fff8eb;border-radius:10px;padding:10px 14px;margin:12px 0;font-size:14px}
+  .danger{border-inline-start:5px solid var(--c-red);background:#fdeeee;border-radius:10px;padding:10px 14px;margin:12px 0;font-size:14px}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+  .svc{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+  .svc h4{margin:0 0 6px}
+  .svc ul{margin:6px 0 0;padding-inline-start:18px}
+  .svc li{font-size:13.5px}
+  .pill{display:inline-block;background:var(--brand-s);color:var(--brand-d);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:800;margin:2px}
+  .pill.teal{background:#e5f2f2;color:var(--c-teal)}
+  .pill.red{background:#fdeeee;color:var(--c-red)}
+  .pill.amber{background:#fff4e0;color:var(--c-amber)}
+  .qa{background:#f2fbf6;border:1px solid #cfe8d9;border-radius:12px;padding:12px 16px;margin:10px 0}
+  .qa label{display:block;font-weight:700;margin:10px 0 2px}
+  .qa input,.qa textarea{width:100%;border:1px solid #bcdcc7;border-radius:8px;padding:8px 10px;font:inherit;background:#fff}
+  .screen{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px;margin:14px 0;text-align:center}
+  .screen svg{max-width:320px;width:100%;height:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+  .screen .cap{font-size:13.5px;color:var(--muted);margin-top:8px}
+  .screen .how{font-size:12.5px;background:#f4f7f4;border-radius:8px;padding:8px 10px;text-align:right;color:var(--muted);margin-top:8px}
+  .topnav{position:sticky;top:0;z-index:20;background:rgba(246,248,246,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:8px 0;margin-bottom:14px}
+  .topnav a{color:var(--brand-d);text-decoration:none;font-weight:700;font-size:13px;margin-inline-end:14px;white-space:nowrap}
+  .no-print{display:block}
+  .footer-note{text-align:center;color:var(--muted);font-size:12.5px;margin-top:30px}
+  @media print{
+    body{background:#fff;font-size:11px}
+    .topnav,.no-print{display:none!important}
+    .cover{box-shadow:none}
+    pre{white-space:pre-wrap}
+    .paper,.screen,.svc{box-shadow:none;page-break-inside:avoid}
+    h2.chap{page-break-before:always}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="cover no-print">
+    <div class="kicker">REFERENCE DOCUMENT — ATOGA ECOSYSTEM</div>
+    <h1>توثيق المنظومة الشامل</h1>
+    <p class="sub">تطبيقات الزبون · المدير · السائق-المجهّز · لوحة الإدارة — مرجع معماري كامل لإعادة البناء من الصفر (One-Shot Build) بدقة أطروحة علمية، مدعوم بكل الشيفرات والخدمات الخارجية والاستبيان المسبق للمفاتيح.</p>
+    <div class="meta">
+      <span>الإصدار: 1.0.0</span>
+      <span>التاريخ: 2026-10-12</span>
+      <span>Supabase · Firebase (FCM) · ImageKit · GitHub Pages · Flutter 3.38.7</span>
+    </div>
+  </div>
+
+  <nav class="topnav no-print" id="topnav"></nav>
+
+  <div class="toc" id="tocwrap"><h2>فهرس المحتويات</h2><ol id="toclist"></ol></div>
+
+  <main id="content">
+  <h2 class="chap" id="ch0">الجزء 0 — الملخص التنفيذي والنطاق</h2>
+  <div class="paper">
+    <p class="lead">هذه الوثيقة مرجعٌ معماريٌّ متكامل لمنظومة «ATOGA MARKET» المكوّنة من أربع واجهات تعمل فوق خلفية واحدة:
+    تطبيق الزبون، تطبيق المدير، تطبيق السائق-المجهّز، ولوحة الإدارة المستضافة على GitHub Pages.
+    الغرض من الوثيقة: تمكين أي مهندس من <b>إعادة بناء المنظومة كاملة بضغطة واحدة</b> بالاعتماد على
+    هذا الملف فقط، عبر سلسلة أوامر جاهزة، ومخطط قاعدة بيانات كامل، وكل الإعدادات، وقائمة مفاتيح مطلوبة
+    في بداية المشروع، وقائمة أسئلة استيضاحية على من يطلب البناء.</p>
+    <h3>أهداف النظام</h3>
+    <ul>
+      <li>متجر إلكتروني للمواد الغذائية (جرد، تصنيفات، بنرات، كوبونات) بتجربة عربية/فرنسية (RTL).</li>
+      <li>محفظة إلكترونية يدفع بها الزبون وتشحنها الإدارة (لا يُعدّل رصيدها من العميل).</li>
+      <li>إدارة كاملة: منتجات، تصنيفات بأيقونات، تسويق (بنرات/كوبونات/إشعارات)، زبائن، أوقات عمل، موظفون.</li>
+      <li>واجهة سائق/مجهّز: استقبال الطلبات لحظياً (Realtime) بنظام «أول من يضغط يستلم» (Atomic Claim)،
+      قائمة تجهيز تعيد حساب الإجمالي عند نفاد صنف، طباعة فاتورة حرارية Bluetooth، وإشعارات تعمل حتى عند إغلاق التطبيق.</li>
+      <li>لوحة إدارة (Super Admin) لاعتماد الطلبات وإنشاء الحسابات، وقسم «إخراج التطبيق من التجربة» لتنظيف البيانات التجريبية بتحكّم دقيق.</li>
+    </ul>
+    <h3>المخرجات النهائية</h3>
+    <table>
+      <tr><th>المكوّن</th><th>المستودع (GitHub)</th><th>البنية الأساسية</th><th>المخرجات</th></tr>
+      <tr><td>تطبيق الزبون</td><td>teomar007/atoga_customer</td><td>Flutter 3.38.7 · Dart 3.10.7</td><td>APK (59.1MB) + AAB (47.2MB)</td></tr>
+      <tr><td>تطبيق المدير</td><td>teomar007/atoga_manager</td><td>Flutter 3.38.7 · Riverpod · GoRouter</td><td>APK (56.9MB)</td></tr>
+      <tr><td>تطبيق السائق-المجهّز</td><td>مستودع محلي ATOGA_DRAIVER</td><td>Flutter 3.38.7 · Realtime · FCM · ESC/POS</td><td>APK (55.5MB)</td></tr>
+      <tr><td>لوحة الإدارة</td><td>teomar007/atouga-admin-panel</td><td>HTML/JS/CSS (Tailwind CDN) + GitHub Pages</td><td>صفحة حية: teomar007.github.io/atouga-admin-panel</td></tr>
+    </table>
+  </div>
+
+  <h2 class="chap" id="ch1">الجزء 1 — المنهجية وتاريخ المشروع</h2>
+  <div class="paper">
+    <h3>المبادئ المعتمدة</h3>
+    <ul>
+      <li><b>RLS أولاً</b>: كل جدول يملك سياسات صفوف؛ أية كتابة من العميل تخضع لسياسة `with check`، والحسابات المتميّزة تُدار بدوال SECURITY DEFINER.</li>
+      <li><b>مفتاح publishable فقط في الكلائنات</b>: لا يُنشر service_role إطلاقاً في أي واجهة عميل.</li>
+      <li><b>ترقيات قابلة لإعادة التنفيذ</b>: `create or replace`، `add column if not exists`، `on conflict do nothing`.</li>
+      <li><b>التجربة تُبنى وتُختبر مباشرة</b>: بنية تدريجية، وكل مرحلة مكتفية وظيفياً.</li>
+      <li><b>الهاتف = اسم مستخدم</b>: مدخل الزبون رقم هاتف يتحول داخلياً إلى بريد وهمي `<phone>@atoga.com` عبر GoTrue (لا OTP).</li>
+    </ul>
+    <h3>التاريخ الكامل (من البداية حتى التسليم)</h3>
+    <details open><summary>خط زمني موجز</summary>
+      <table>
+        <tr><th>المرحلة</th><th>ما أُنجز</th></tr>
+        <tr><td>1. الأساس</td><td>مخطط Supabase الأساسي: profiles, categories, products, promo_banners, coupons, cart_items, favorites, social_links, addresses, delivery_zones, orders, order_items + RLS + Realtime على orders + دالة handle_new_user.</td></tr>
+        <tr><td>2. الزبون (أساس)</td><td>مصادقة (هاتف/كلمة مرور + Google)، رئيسية (بنرات/تصنيفات/بحث/شبكة/تمرير)، سلة محلية ثم سحابية، كوبونات، مفضلة، محفظة، عناوين وخريطة (flutter_map/OSM + Nominatim)، طلبات وتتبّع، إعدادات وحساب وحذف حساب.</td></tr>
+        <tr><td>3. الإشعارات</td><td>الانتقال من OneSignal إلى FCM المباشر: firebase_core/firebase_messaging/flutter_local_notifications، `send-push` Edge Function، trigger `orders_status_push`، حفظ fcm_token في profiles.</td></tr>
+        <tr><td>4. الإدارة (Admin)</td><td>RBAC (staff_roles: super_admin/manager/marketer/driver/packager/driver_packager)، لوحة معلومات (KPIs والسلاسل وأداء المنتجات)، الكتالوج (ImageKit رفع مباشر)، التسويق، المحفظة، الزبائن والتجميد، أوقات العمل، الموظفون، الإعدادات وروابط الدعم.</td></tr>
+        <tr><td>5. Admin Panel</td><td>صفحة GitHub Pages: طلبات الوصول، إنشاء حساب، إدارة الحسابات (تعديل/كلمة مرور/تجميد/حذف)، ثم قسم «إخراج التطبيق من التجربة» (golive).</td></tr>
+        <tr><td>6. السائق-المجهّز</td><td>دخول باليوزر، طابور Realtime، استلام ذرّي (claim_order)، قائمة تجهيز والأسعار الحية (is_available)، انتقالات الحالة، طباعة حرارية Bluetooth، لوحة أداء، تنبيه popup+صوت+اهتزاز، ثم FCM + خدمة أمامية.</td></tr>
+        <tr><td>7. تحسينات متقاطعة</td><td>حفظ منطقة التوصيل على الطلب (زوم + trigger تلقائي)، الفاتورة الحية عند الزبون وشاشة «نفد المخزون»، التجميد الحي، 90 أيقونة تصنيف عربي/فرنسي، تصحيح get_or_create_my_profile.</td></tr>
+        <tr><td>8. الجودة</td><td>دفتر اختبار شامل (233 حالة) مع سكورات دائرية وروابط عبر التطبيقات (82 رابطاً).</td></tr>
+        <tr><td>9. التسليم</td><td>بناء Release: الزبون (APK+AAB موقّع بالمفتاح الحقيقي)، المدير والسائق (APK)، وتحديث المستودعات.</td></tr>
+      </table>
+    </details>
+  </div>
+
+  <h2 class="chap" id="ch2">الجزء 2 — الهندسة المعمارية والطبقات</h2>
+  <div class="paper">
+    <p>منظومة سحابية: أربع واجهات عميل لا تحفظ حالةً في الخادم إلا عبر Supabase؛ وكل عملية متميّزة تُنفَّذ من خلال
+    Roles/RLS أو دوال SECURITY DEFINER أو Edge Functions. الصور تُرفع مباشرة إلى ImageKit (وليس storage Supabase).</p>
+    <svg viewBox="0 0 960 560" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;background:#fbfdfb;border:1px solid var(--line);border-radius:12px">
+      <style>text{font-family:Segoe UI,Tahoma,sans-serif}.box{stroke:#cdd;stroke-width:1.5;rx:12}.lbl{font-size:13px;font-weight:700}.sub{font-size:11px;fill:#5c6b60}.lnk{stroke:#8aa;stroke-width:1.6;fill:none;marker-end:url(#a)}</style>
+      <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#8aa"/></marker></defs>
+      <rect class="box" x="20" y="30" width="210" height="120" fill="#fdeeee"/><text class="lbl" x="30" y="55">تطبيق الزبون</text><text class="sub" x="30" y="76">Flutter · red #E53935</text><text class="sub" x="30" y="94">هاتف=بريد وهمي · Google</text><text class="sub" x="30" y="112">سلة كوبونات محفظة طلبات</text>
+      <rect class="box" x="250" y="30" width="210" height="120" fill="#e5f2f2"/><text class="lbl" x="260" y="55">تطبيق المدير</text><text class="sub" x="260" y="76">Flutter · teal #107275</text><text class="sub" x="260" y="94">كتالوج · تسويق · محفظة</text><text class="sub" x="260" y="112">أوقات · موظفون · زبائن</text>
+      <rect class="box" x="480" y="30" width="210" height="120" fill="#e9f7e9"/><text class="lbl" x="490" y="55">تطبيق السائق</text><text class="sub" x="490" y="76">Flutter · green #1CB01C</text><text class="sub" x="490" y="94">طابور ذرّي · طابعة حرارية</text><text class="sub" x="490" y="112">تنبيه FCM + خدمة أمامية</text>
+      <rect class="box" x="710" y="30" width="230" height="120" fill="#eef4f6"/><text class="lbl" x="720" y="55">لوحة الإدارة</text><text class="sub" x="720" y="76">HTML/JS · GitHub Pages</text><text class="sub" x="720" y="94">طلبات وصول · حسابات</text><text class="sub" x="720" y="112">تنظيف التجربة (go live)</text>
+      <rect class="box" x="120" y="260" width="700" height="210" fill="#f3f8f3" stroke="#7fb98a"/><text class="lbl" x="135" y="285">Supabase — الخلفية الموحّدة (Project: qwiaxkrwyhdjrucnknhm)</text>
+      <rect x="150" y="300" width="290" height="64" rx="10" fill="#fff" stroke="#bcdcc7"/><text class="lbl" x="160" y="322">PostgreSQL + RLS + Triggers</text><text class="sub" x="160" y="342">20 جدولاً · 30+ دالة وTrigger</text>
+      <rect x="452" y="300" width="150" height="64" rx="10" fill="#fff" stroke="#bcdcc7"/><text class="lbl" x="462" y="322">Auth (GoTrue)</text><text class="sub" x="462" y="342">بريد وهمي بالهاتف</text>
+      <rect x="614" y="300" width="180" height="64" rx="10" fill="#fff" stroke="#bcdcc7"/><text class="lbl" x="624" y="322">Realtime</text><text class="sub" x="624" y="342">orders · order_items · profiles</text>
+      <rect x="150" y="378" width="180" height="64" rx="10" fill="#fff" stroke="#bcdcc7"/><text class="lbl" x="160" y="400">Edge Functions</text><text class="sub" x="160" y="420">send-push · imagekit-auth ·</text><text class="sub" x="160" y="434">admin-create-user/staff · admin-manage-user · delete-account · process-scheduled-notifications</text>
+      <rect x="342" y="378" width="150" height="64" rx="10" fill="#fff" stroke="#bcdcc7"/><text class="lbl" x="352" y="400">pg_net + Vault</text><text class="sub" x="352" y="420">bash HTTP إلى Edge</text><text class="sub" x="352" y="434">أسرار push_*</text>
+      <text class="lbl" x="135" y="478">Firebase (FCM): مشروع atoga-market — google-services.json للحزمتين · send-push يبني بيانات FCM</text>
+      <text class="lbl" x="135" y="500">ImageKit: رفع مباشر (upload.imagekit.io) عبر imagekit-auth (token/signature/publicKey) + تحويلات tr=w-800,f-webp,q-80</text>
+      <text class="sub" x="135" y="522">GitHub Pages: atouga-admin-panel · Nominatim (عكس إحداثيات) · Google Maps عبر deep link (بدون API Key)</text>
+    </svg>
+    <h4>اتجاه البيانات</h4>
+    <ul>
+      <li>الواجهات الأربع → Supabase REST/RPC/Realtime بمفتاح publishable فقط (RLS تحكم الوصول).</li>
+      <li>الزبون والسائق → FCM عبر `send-push` (من triggers في القاعدة عبر pg_net).</li>
+      <li>المدير → ImageKit لرفع صور المنتجات/البنرات (لا تُحفظ في Supabase Storage).</li>
+      <li>اللوحة ← نفس الخلفية بجلسة Super Admin ودوال محمية.</li>
+    </ul>
+  </div>
+
+  <h2 class="chap" id="ch3">الجزء 3 — الخدمات الخارجية والاعتمادات</h2>
+  <div class="grid2">
+    <div class="svc"><h4><span class="pill teal">Supabase</span></h4>
+      <ul><li>URL: <code>https://qwiaxkrwyhdjrucnknhm.supabase.co</code></li>
+      <li>مفتاح publishable/anon: يُقرأ من <code>config.js</code> (اللوحة) و<code>lib/core/config/supabase_config.dart</code> (تطبيقات Flutter) — لا يُنشر سواه.</li>
+      <li>service_role: للـ Edge Functions والترقيات فقط (Vault/خوادم).</li>
+      <li>Vault secrets (أسماء): <code>push_internal_secret</code>، <code>push_anon_key</code> (اختياري service_role).</li>
+      <li>Edge Functions المنشورة: <b>send-push</b>، <b>imagekit-auth</b>، <b>admin-create-user</b>، <b>admin-create-staff</b>، <b>admin-manage-user</b>، <b>delete-account</b>، <b>process-scheduled-notifications</b>.</li>
+      <li>استدعاء داخلي: <code>notify_order_status_change()</code> و<code>notify_new_order_drivers()</code> عبر pg_net → send-push.</li></ul></div>
+    <div class="svc"><h4><span class="pill red">Firebase — FCM</span></h4>
+      <ul><li>المشروع: <code>atoga-market</code> (project_number 41127470588).</li>
+      <li>تطبيقان لأندرويد: <code>com.atogamarket.atoga_customer</code>، <code>com.atoga.atoga_draiver</code> — لكل واحد `google-services.json` خاص.</li>
+      <li>سر Edge: <code>FIREBASE_SERVICE_ACCOUNT</code> (Service Account JSON) يُقرأ في send-push.</li>
+      <li>قناة الزبون: <code>atoga_default</code> — قناة السائق: <code>driver_orders</code> (صوت <code>order_alert</code> بسمة Alarm).</li>
+      <li>المعايير: رسالة FCM من send-push تحتوي notification+data، ويحدد السائق channel_id للتطبيق المغلق.</li></ul></div>
+    <div class="svc"><h4><span class="pill amber">ImageKit</span></h4>
+      <ul><li>رفع مباشر من العميل عبر <code>upload.imagekit.io/api/v1/files/upload</code>.</li>
+      <li>مصادقة بالرمق: Edge <code>imagekit-auth</code> تعيد {token, expire, signature, publicKey}.</li>
+      <li>المفاتيح: publicKey/privateKey/urlEndpoint (تُدخل في بداية المشروع — لا تُضمَّن في الكود).</li>
+      <li>التحويلات: <code>w-800,f-webp,q-80</code> لتقليص الصور.</li></ul></div>
+    <div class="svc"><h4><span class="pill">GitHub</span></h4>
+      <ul><li>المستودعات: <code>atoga_customer</code>، <code>atoga_manager</code>، <code>atouga-admin-panel</code> (Pages عامة)، و<code>ATOGA_DRAIVER</code> محلي.</li>
+      <li>Pages: <code>teomar007.github.io/atouga-admin-panel</code> (فرع main، من جذر المستودع).</li>
+      <li>الهوية المطلوبة للرفع: user.name/user.email وأي PAT.</li></ul></div>
+    <div class="svc"><h4><span class="pill teal">خدمات مساندة</span></h4>
+      <ul><li>Nominatim (reverse geocode) من checkout — مجاني بلا مفتاح.</li>
+      <li>خرائط flutter_map/OSM داخل الزبون + Google Maps عبر <code>url_launcher</code> deep link (لا API Key).</li>
+      <li>GoTrue: تسجيل الدخول ببريد وهمي مشتق من الهاتف (<code>PhoneNumbers.toDummyEmail</code>).</li>
+      <li>التخزين المحلي: SecureStorage (جلسة) · Hive (سلة) · SharedPreferences (لغة/إعدادات).</li></ul></div>
+  </div>
+  <div class="paper">
+    <h3>اعتمادات Flutter (الإصدارات الحقيقية من pubspec)</h3>
+    <table>
+      <tr><th>الحزمة</th><th>الزبون</th><th>المدير</th><th>السائق</th></tr>
+      <tr><td>flutter_riverpod</td><td>2.6.1</td><td>2.6.1</td><td>2.6.1</td></tr>
+      <tr><td>supabase_flutter</td><td>2.9.0</td><td>2.9.0</td><td>2.9.0</td></tr>
+      <tr><td>go_router</td><td>—</td><td>14.6.2</td><td>14.6.2</td></tr>
+      <tr><td>firebase_core / firebase_messaging</td><td>3.8.0 / 15.1.5</td><td>—</td><td>3.8.0 / 15.1.5</td></tr>
+      <tr><td>flutter_local_notifications</td><td>18.0.1</td><td>—</td><td>18.0.1</td></tr>
+      <tr><td>google_fonts (Cairo)</td><td>6.2.1</td><td>6.2.1</td><td>6.2.1</td></tr>
+      <tr><td>cached_network_image</td><td>3.4.1</td><td>3.4.1</td><td>3.4.1</td></tr>
+      <tr><td>url_launcher</td><td>6.3.1</td><td>—</td><td>6.3.1</td></tr>
+      <tr><td>خاص بالزبون</td><td colspan="3">gotrue · postgrest · hive · hive_flutter · flutter_secure_storage · shimmer · geolocator · flutter_map · latlong2 · connectivity_plus · font_awesome_flutter</td></tr>
+      <tr><td>خاص بالمدير</td><td colspan="3">image_picker · fl_chart · http</td></tr>
+      <tr><td>خاص بالسائق</td><td colspan="3">audioplayers · vibration · unified_esc_pos_printer (ESC/POS Bluetooth) · flutter_background_service</td></tr>
+    </table>
+    <div class="note">ملاحظة تاريخية: بدأ الزبون بـ OneSignal ثم حُوِّل إلى FCM المباشر للإشعارات، وأُزيلت تبعية OneSignal نهائياً.</div>
+  </div>
+
+  <h2 class="chap" id="ch4">الجزء 4 — قاعدة البيانات الكاملة</h2>
+  <div class="paper">
+    <p>كل الجداول في المخطط <code>public</code> (20 جدولاً). الأعمدة أدناه مطابقة للقاعدة المنشورة؛
+    السكربتات الأصلية: <code>supabase/schema.sql</code> و<code>supabase/admin_schema.sql</code> و<code>supabase/admin_analytics.sql</code>
+    ومعها الترقيات المطبَّقة عبر MCP (driver_fulfillment_core، order_delivery_zone، orders_auto_delivery_zone، notify_new_order_drivers، admin_golive_cleanup…).</p>
+    <h3>4.1 الجداول الرئيسية</h3>
+    <table>
+      <tr><th>الجدول</th><th>أهم الأعمدة</th><th>ملاحظات</th></tr>
+      <tr><td>profiles</td><td>id, display_name, phone, username, language_code, theme_mode, notifications_enabled, wallet_balance, fcm_token, onesignal_id(قديم), is_admin, is_frozen, frozen_reason, avatar_url</td><td>id=FK→auth.users؛ منح أعمدة UPDATE محصورة (لا تعديل رصيد من العميل).</td></tr>
+      <tr><td>staff_roles</td><td>user_id, role (enum staff_role), is_active, created_by, created_at, updated_at</td><td>role ∈ {super_admin, manager, marketer, driver, packager, driver_packager}</td></tr>
+      <tr><td>categories</td><td>id, name_ar, name_fr, icon_name, icon_url, is_active, display_order, name (مولّد)</td><td>العمود name = name_ar مولّداً.</td></tr>
+      <tr><td>products</td><td>id (text uuid), name, name_fr, price, old_price, is_promo, stock, unit, image_url, category_id, is_active</td><td>FK category_id → categories (on delete set null).</td></tr>
+      <tr><td>promo_banners</td><td>id, title, title_fr, subtitle, subtitle_fr, image_url, background_color, image_align_x/y, image_scale, target_category_id, sort_order, is_active</td><td>—</td></tr>
+      <tr><td>coupons</td><td>id, code (unique), title, discount_type, discount_value, min_order, max_discount, usage_limit_per_user, is_welcome, starts_at, expires_at, is_active</td><td>discount_type ∈ percent/fixed/free_shipping.</td></tr>
+      <tr><td>user_coupons / coupon_redemptions</td><td>user_id, coupon_id, is_used … / coupon_id, user_id, order_id, redeemed_at</td><td>FKs cascade مع الكوبون.</td></tr>
+      <tr><td>cart_items / favorites</td><td>user_id, product_id, quantity, name، price، unit …</td><td>نسخ أسعار وقت الإضافة.</td></tr>
+      <tr><td>addresses</td><td>user_id, label, street, building, apartment, notes, phone, latitude, longitude, delivery_zone_id, is_default</td><td>FK → delivery_zones (set null).</td></tr>
+      <tr><td>delivery_zones</td><td>id, name, delivery_fee, is_active</td><td>إداري فقط.</td></tr>
+      <tr><td>orders</td><td>id, user_id, created_at, subtotal, discount, delivery_fee, total, coupon_code, payment_method, status, street, building, apartment, notes, phone, lat/lng, delivery_zone_id, delivery_zone_name, claimed_by, claimed_at, packager_id, driver_id, preparing_at, picked_at, delivered_at, returned_at, return_reason</td><td>status ∈ received/preparing/on_the_way/delivered/cancelled/returned.</td></tr>
+      <tr><td>order_items</td><td>id (identity bigint), order_id, product_id, name, name_fr, price, quantity, image_url, unit, is_available</td><td>is_available يضبطه المجهّز (نفد المخزون).</td></tr>
+      <tr><td>wallet_transactions</td><td>id, user_id, amount, type (deposit/payment/withdrawal), order_id (text), note</td><td>لا FK على orders — الحذف يتم عبر الدوال.</td></tr>
+      <tr><td>store_hours / store_shifts</td><td>day_of_week, فترات …</td><td>إداري.</td></tr>
+      <tr><td>social_links</td><td>key, url</td><td>قيم SM: contact_phone, whatsapp_number, facebook, instagram, tiktok.</td></tr>
+      <tr><td>notification_campaigns / scheduled_notifications</td><td>title/body/image/mode/topic/target_user_id/status/response…</td><td>إدارة الإشعارات.</td></tr>
+      <tr><td>admin_requests</td><td>user_id, email, status (pending/approved/rejected)</td><td>طلب وصول لوحة الإدارة.</td></tr>
+    </table>
+
+    <h3>4.2 RLS — أهم السياسات</h3>
+    <details><summary>عرض ملخص السياسات (للمرجع)</summary>
+      <pre>-- الكتالوج عام للقراءة
+create policy "Read active categories" on categories for select using (is_active = true);
+create policy "Public read products" on products for select to anon, authenticated using (true);
+
+-- بيانات خاصة بالزبون
+create policy "Users own cart_items/favorites/addresses" ... using (auth.uid() = user_id);
+create policy "Users read own orders" on orders for select using (auth.uid() = user_id);
+create policy "Users cancel own pending order" on orders for update
+  using (auth.uid() = user_id and status = 'received')
+  with check (auth.uid() = user_id and status = 'cancelled');
+
+-- كوادر التوصيل (تمت إضافتها لاحقاً)
+create policy "Fulfillment read orders" on orders for select using (public.is_fulfillment_staff());
+create policy "Fulfillment update orders" on orders for update
+  using (public.is_fulfillment_staff()) with check (public.is_fulfillment_staff());
+create policy "Fulfillment read order items" on order_items for select using (public.is_fulfillment_staff());
+
+-- الإدارة (Super Admin/Manager) للكتالوج والتسويق...
+create policy "Catalog manage products" ... using (public.can_manage_catalog());
+create policy "Marketing manage banners/coupons" ... using (public.can_manage_marketing());</pre>
+    </details>
+
+    <h3>4.3 Triggers (على orders والقاعدة)</h3>
+    <table>
+      <tr><th>Trigger</th><th>الوظيفة</th></tr>
+      <tr><td>orders_fill_delivery_zone (BEFORE INSERT)</td><td>يملأ المنطقة تلقائياً عند غيابها (تطابق سعر الرسوم → أكدس أحدث عنوان).</td></tr>
+      <tr><td>orders_guard_frozen_customer (BEFORE INSERT)</td><td>يمنع إنشاء الطلب لحساب مجمّد (خطأ account_frozen).</td></tr>
+      <tr><td>orders_record_coupon_redemption (AFTER INSERT)</td><td>يسجل استهلاك الكوبون عند الطلب.</td></tr>
+      <tr><td>orders_status_push (AFTER UPDATE OF status)</td><td>إشعار FCM للزبون عند تغيّر الحالة (send-push mode order_status).</td></tr>
+      <tr><td>orders_new_order_push (AFTER INSERT)</td><td>إشعار FCM لسائقي/مجهّزي المنظومة عند طلب جديد (send-push mode new_order → تعداد رموز الموظفين النشطين).</td></tr>
+      <tr><td>guard_primary_admin (+ حماية الملف expire) على auth.users/staff_roles</td><td>عدم حذف/تعديل الحساب الرئيسي dirayalab@gmail.com.</td></tr>
+      <tr><td>guard_wallet_balance (BEFORE UPDATE profiles)</td><td>منع رصيد سالب.</td></tr>
+    </table>
+    <div class="warn">قاعدة مهمة: كل trigger إشعاري يعمل عبر pg_net (غير متزامن) ومحصّن بـ BEGIN…EXCEPTION حتى لا يُفشل الطلب؛ ولا يُمسّ trigger الزبون عند إعادة النشر.</div>
+
+    <h3>4.4 أهم دوال RPC (عرض، إدارة، توصيل، تنظيف)</h3>
+    <details><summary>قائمة عامة + نموذجا RPC للاستلام الذرّي وتعديل التوفر</summary>
+      <pre><span class="cm">-- الاستلام الذرّي: أول من يضغط يملك الطلب (قفل صف + حالة)</span>
+create or replace function public.claim_order(p_order_id uuid)
+returns public.orders
+language plpgsql security definer set search_path = public
+as $$
+declare v_order public.orders;
+begin
+  if not public.is_fulfillment_staff() then raise exception 'forbidden'; end if;
+  select * into v_order from public.orders where id = p_order_id for update;
+  if not found then raise exception 'order_not_found'; end if;
+  if v_order.status <> 'received' then raise exception 'order_already_claimed'; end if;
+  -- محفظة: الخصم النهائي عند التجهيز
+  if v_order.payment_method = 'wallet' then
+    -- (يخصم المحفظة ويحسب الإجمالي من أصناف الطلب)
+    perform public.prepare_order_wallet_payment(p_order_id);
+  end if;
+  update public.orders
+     set status='preparing', packager_id=auth.uid(), claimed_by=auth.uid(),
+         claimed_at=now(), preparing_at=coalesce(preparing_at, now())
+   where id = p_order_id returning * into v_order;
+  return v_order;
+end $$;
+
+<span class="cm">-- تعديل توفر صنف + إعادة حساب الإجمالي فوراً (+ استرداد فرق المحفظة)</span>
+create or replace function public.set_order_item_availability(p_item_id bigint, p_available boolean)
+returns public.orders ...  -- تحديث is_available ثم subtotal/total؛ محفظة تُردّ الفرق كـ deposit
+</pre>
+      <p>البقية: <code>start_order_delivery</code>، <code>complete_order_delivery</code>، <code>return_order(p_order_id, p_reason)</code> (سبب إلزامي)،
+      <code>driver_stats()</code>، <code>get_order_customer(uuid)</code>، <code>resolve_username(p_username)</code>،
+      <code>get_or_create_my_profile()</code>، <code>admin_list_staff</code> / <code>admin_employee_stats</code> / <code>admin_employee_orders</code>،
+      <code>admin_approve/reject_access_request</code>، <code>admin_update_account</code> / <code>admin_set_account_active</code> / <code>admin_delete_account</code>،
+      <code>admin_dashboard_kpis</code> / <code>admin_sales_series</code> / <code>admin_product_performance</code>،
+      <code>credit_wallet</code> / <code>prepare_order_wallet_payment</code>،
+      <code>admin_golive_summary</code> / <code>admin_golive_delete(jsonb)</code> / <code>admin_backup_snapshot()</code>،
+      <code>is_fulfillment_staff</code> / <code>is_super_admin</code> / <code>can_manage_catalog</code> …</p>
+    </details>
+
+    <h3>4.5 Realtime</h3>
+    <p>النشر <code>supabase_realtime</code> يبثّ الجداول: <b>orders</b> و<b>order_items</b> و<b>profiles</b> — تعتمد عليها
+    قوائم الزبون والسائق والتنبيهات وحالة التجميد الحيّة. ملاحظة: يجب أن تكون سياسة SELECT متاحة للدور المشترك لكي يصل البث.</p>
+  </div>
+
+  <h2 class="chap" id="ch5">الجزء 5 — تطبيق الزبون (Customer)</h2>
+  <div class="paper">
+    <p><span class="pill red">الموضوع: أحمر #E53935</span> <span class="pill">ثيم فاتح</span> <span class="pill">عربي/فرنسي RTL</span>
+    6 تبويبات: الرئيسية، السلة، المحفظة، طلباتي، الكوبونات، حسابي.</p>
+    <h3>تدفقات أساسية</h3>
+    <ul>
+      <li><b>المصادقة</b>: الهاتف → بريد وهمي <code>0555…@atoga.com</code> → GoTrue password؛ أو Google OAuth بمخطط <code>atogamarket://login-callback</code>.</li>
+      <li><b>الطلب</b>: سلة ← عنوان (منطقة/خريطة/دبوس/عكس إحداثيات عبر Nominatim) ← كوبون ← COD أو محفظة ← إنشاء طلب (wallet عبر RPC) ← شاشة النجاح.</li>
+      <li><b>التتبّع الحي</b>: شاشة الطلب تستمع بثّ orders + order_items؛ يظهر «نفد المخزون» ويُحدَّث الإجمالي فوراً.</li>
+      <li><b>التجميد</b>: banner + تعطيل الشراء + منع خادمي عبر trigger.</li>
+      <li><b>الإشعارات</b>: FCM بأسلوب Big Picture + فتح التتبّع من النقر.</li>
+    </ul>
+    <h3>بنية الكود الرئيسية</h3>
+    <pre>lib/features/
+  auth/     (login_screen, auth_controller, supabase_auth_repository, fcm_service)
+  home/     (home_screen, home_controller, category_rail, product_card, promo_carousel)
+  cart/     (cart_controller, cart_screen, cart_cloud_store)
+  checkout/ (checkout_screen, checkout_controller, address_form_screen, location_picker_field)
+  wallet/   (wallet_screen, wallet_provider)
+  orders/   (orders_screen, order_tracking_screen, orders_controller)
+  coupons/  (coupons_screen, coupons_controller)
+  profile/  (profile_screen, faq, privacy, terms, support)</pre>
+  </div>
+
+  <h3>معرض الشاشات (محاكاة مولّدة برمجياً — الدقة من الكود الفعلي)</h3>
+  <div class="screen">
+    <svg viewBox="0 0 300 620" xmlns="http://www.w3.org/2000/svg">
+      <rect width="300" height="620" rx="26" fill="#f5f5f5"/><rect x="10" y="10" width="280" height="600" rx="20" fill="#fff"/>
+      <rect x="30" y="14" width="60" height="8" rx="4" fill="#ddd"/><rect x="0" y="0" width="300" height="100" fill="#c62828"/>
+      <text x="24" y="40" fill="#fff" font-size="16" font-weight="bold">ATOGA MARKET</text>
+      <rect x="20" y="70" width="260" height="34" rx="10" fill="#fff" opacity=".9"/>
+      <text x="34" y="93" fill="#999" font-size="13">ابحث عن منتج...</text>
+      <rect x="20" y="116" width="160" height="86" rx="10" fill="#fce4e4"/>
+      <text x="30" y="140" fill="#9a2d2d" font-size="12" font-weight="bold">بنر العرض 1</text>
+      <text x="30" y="160" fill="#aa5" font-size="11">عروض اليوم</text>
+      <rect x="20" y="216" width="260" height="64" rx="10" fill="#fff" stroke="#eee"/>
+      <circle cx="40" cy="248" r="18" fill="#ff8a80"/><text x="52" y="253" font-size="12">الكل</text>
+      <circle cx="92" cy="248" r="18" fill="#ef9a9a"/><text x="104" y="253" font-size="11">مشروبات</text>
+      <circle cx="144" cy="248" r="18" fill="#ffcc80"/><text x="156" y="253" font-size="11">ألبان</text>
+      <rect x="20" y="292" width="126" height="150" rx="10" fill="#fff" stroke="#eee"/>
+      <rect x="28" y="300" width="110" height="80" rx="8" fill="#f2f2f2"/>
+      <text x="32" y="394" font-size="12" font-weight="bold">منتج 1</text>
+      <text x="32" y="412" fill="#c62828" font-size="12" font-weight="bold">120 دج</text>
+      <rect x="154" y="292" width="126" height="150" rx="10" fill="#fff" stroke="#eee"/>
+      <rect x="162" y="300" width="110" height="80" rx="8" fill="#f2f2f2"/>
+      <text x="166" y="394" font-size="12" font-weight="bold">منتج 2</text>
+      <text x="166" y="412" fill="#c62828" font-size="12" font-weight="bold">280 دج</text>
+      <rect x="0" y="556" width="300" height="64" fill="#fff" stroke="#eee"/>
+      <text x="34" y="592" font-size="11">الرئيسية</text><text x="82" y="592" font-size="11" fill="#999">السلة</text>
+      <text x="130" y="592" font-size="11" fill="#999">المحفظة</text><text x="182" y="592" font-size="11" fill="#999">طلباتي</text>
+      <text x="240" y="592" font-size="11" fill="#999">حسابي</text>
+    </svg>
+    <div class="cap">الشاشة الرئيسية للزبون (بنر + تصنيفات + شبكة منتجات).</div>
+    <div class="how"><b>كيف تلتقطها فعلياً:</b> شغّل الواجهة عبر <code>flutter run -d chrome --web-port=5501</code> وافتح الشاشة ثم «طباعة/حفظ Page» أو لقطة شاشة جهاز.</div>
+  </div>
+  <div class="screen">
+    <svg viewBox="0 0 300 620" xmlns="http://www.w3.org/2000/svg">
+      <rect width="300" height="620" rx="26" fill="#f5f5f5"/><rect x="10" y="10" width="280" height="600" rx="20" fill="#fff"/>
+      <rect width="300" height="56" fill="#c62828"/><text x="24" y="36" fill="#fff" font-size="16" font-weight="bold">السلة</text>
+      <rect x="20" y="72" width="260" height="74" rx="10" fill="#fff" stroke="#eee"/>
+      <rect x="28" y="80" width="52" height="52" rx="8" fill="#f2f2f2"/>
+      <text x="90" y="106" font-size="13" font-weight="bold">طماطم مصبرة 400غ</text>
+      <text x="90" y="128" fill="#999" font-size="12">1 × 120 دج</text>
+      <rect x="206" y="96" width="52" height="24" rx="12" stroke="#c62828"/><text x="214" y="113" font-size="12" fill="#c62828">+1</text>
+      <rect x="20" y="158" width="260" height="74" rx="10" fill="#fff" stroke="#eee"/>
+      <rect x="28" y="166" width="52" height="52" rx="8" fill="#f2f2f2"/>
+      <text x="90" y="192" font-size="13" font-weight="bold">حليب 1 لتر</text>
+      <text x="90" y="214" fill="#999" font-size="12">2 × 210 دج</text>
+      <rect x="206" y="182" width="52" height="24" rx="12" stroke="#c62828"/><text x="214" y="199" font-size="12" fill="#c62828">+2</text>
+      <rect x="20" y="420" width="260" height="118" rx="10" fill="#fff8f8" stroke="#f0bdbd"/>
+      <text x="30" y="446" font-size="12">المجموع الفرعي</text><text x="252" y="446" font-size="12" font-weight="bold">540 دج</text>
+      <text x="30" y="470" font-size="12">الخصم</text><text x="252" y="470" font-size="12" fill="#15a05a">-50 دج</text>
+      <text x="30" y="494" font-size="12">التوصيل</text><text x="252" y="494" font-size="12">350 دج</text>
+      <text x="30" y="524" font-size="14" font-weight="bold">الإجمالي</text><text x="252" y="524" font-size="14" font-weight="bold" fill="#c62828">840 دج</text>
+      <rect x="20" y="548" width="260" height="46" rx="12" fill="#c62828"/>
+      <text x="128" y="576" fill="#fff" font-size="14" font-weight="bold">إتمام الطلب</text>
+    </svg>
+    <div class="cap">السلة: الأسئلة كمية/الملاحظات + المجاميع + إتمام الطلب.</div>
+    <div class="how"><b>كيف تلتقطها:</b> أضف منتجات من الرئيسية وافتح السلة.</div>
+  </div>
+  <div class="screen">
+    <svg viewBox="0 0 300 620" xmlns="http://www.w3.org/2000/svg">
+      <rect width="300" height="620" rx="26" fill="#f5f5f5"/><rect x="10" y="10" width="280" height="600" rx="20" fill="#fff"/>
+      <rect width="300" height="56" fill="#c62828"/><text x="24" y="36" fill="#fff" font-size="16" font-weight="bold">تتبّع الطلب</text>
+      <rect x="20" y="72" width="260" height="120" rx="10" fill="#fff" stroke="#eee"/>
+      <text x="30" y="96" font-size="14" font-weight="bold" fill="#2f80ed">في طريق التوصيل</text>
+      <text x="30" y="120" fill="#999" font-size="12">الطلب: 2B85D74C</text>
+      <text x="30" y="140" fill="#999" font-size="12">حي الزهور — شارع ...</text>
+      <circle cx="54" cy="172" r="10" fill="#c62828"/><circle cx="96" cy="172" r="10" fill="#c62828"/>
+      <circle cx="138" cy="172" r="10" fill="#c62828"/><circle cx="180" cy="172" r="10" fill="#ccc"/>
+      <text x="40" y="200" font-size="10">استلام</text><text x="84" y="200" font-size="10">تجهيز</text><text x="128" y="200" font-size="10">توصيل</text><text x="170" y="200" font-size="10">تسليم</text>
+      <rect x="20" y="204" width="260" height="64" rx="10" fill="#e8f7ef" stroke="#a7d9bc"/>
+      <text x="30" y="228" font-size="12" font-weight="bold" fill="#0e6b46">المندوب: Karim</text>
+      <text x="30" y="248" font-size="12" fill="#0e6b46">0540 00 00 00 · اتصال</text>
+      <rect x="20" y="282" width="260" height="200" rx="10" fill="#fff" stroke="#eee"/>
+      <text x="30" y="306" font-size="13" font-weight="bold">الفاتورة</text>
+      <text x="30" y="334" font-size="12">طماطم 1×120</text><text x="252" y="334" font-size="12">120 دج</text>
+      <text x="30" y="356" font-size="12">حليب 2×210</text><text x="252" y="356" font-size="12">420 دج</text>
+      <text x="30" y="382" font-size="12" fill="#c62828" text-decoration="line-through">جبن 500غ</text><text x="252" y="382" font-size="12">—</text>
+      <text x="30" y="404" font-size="11" fill="#c62828" font-weight="bold">نفد المخزون</text>
+      <text x="30" y="430" font-size="12">التوصيل</text><text x="252" y="430" font-size="12">350 دج</text>
+      <text x="30" y="458" font-size="14" font-weight="bold">الإجمالي</text><text x="252" y="458" font-size="14" font-weight="bold" fill="#c62828">890 دج</text>
+    </svg>
+    <div class="cap">شاشة التتبّع: الخط الزمني، المندوب، الفاتورة الحيّة مع شارة نفد المخزون.</div>
+    <div class="how"><b>كيف تلتقطها:</b> اضغط «تتبّع» على طلب جارٍ.</div>
+  </div>
+
+  <h2 class="chap" id="ch6">الجزء 6 — تطبيق المدير (Manager)</h2>
+  <div class="paper">
+    <p><span class="pill teal">الموضوع: تركوازي #107275</span> 8 أقسام تظهر حسب الدور:
+    لوحة المعلومات، الكتالوج، التسويق، المحفظة، الزبائن، أوقات العمل، الموظفون، الإعدادات.</p>
+    <h3>أبرز التفاصيل التقنية</h3>
+    <ul>
+      <li>الدخول باليوزر نيم عبر <code>resolve_username</code>؛ الحسابات الرئيسية محمية؛ أدوار التوصيل محجوبة من تطبيق الإدارة.</li>
+      <li>الكتالوج: منتجات (رفع صورة ImageKit، سعر/سعر عرض، وحدة، إظهار/إخفاء، حذف) وتصنيفات (أيقونة + بحث عربي/فرنسي/إنجليزي، ترجمة تلقائية، حذف يبقي المنتجات بلا تصنيف).</li>
+      <li>التسويق: بنرات (صورة/لون، محاذاة/تكبير)، كوبونات (نوع/حدود/ترحيبي)، إشعارات فورية ومجدولة (send-push).</li>
+      <li>المحفظة: شحن/خصم (credit/debit RPC) وسجل الحركات.</li>
+      <li>الزبائن: بحث وإحصاءات وتجميد بسبب (يعرضه الزبون فوراً عبر Realtime على profiles).</li>
+      <li>الموظفون: إنشاء عبر <code>admin-create-staff</code> (يُحوّل اليوزر إلى بوتبرّيد username@atoga.com)، تعديل، كلمة مرور، تجميد، حذف، إحصاءات.</li>
+    </ul>
+    <h3>لوحة معلومات المدير (مثال)</h3>
+    <div class="screen">
+      <svg viewBox="0 0 300 620" xmlns="http://www.w3.org/2000/svg">
+        <rect width="300" height="620" rx="26" fill="#f5f5f5"/><rect x="10" y="10" width="280" height="600" rx="20" fill="#fff"/>
+        <rect width="300" height="56" fill="#0b5759"/><text x="24" y="36" fill="#fff" font-size="16" font-weight="bold">لوحة المعلومات</text>
+        <rect x="20" y="72" width="124" height="86" rx="12" fill="#e5f2f2"/><text x="30" y="98" font-size="11" fill="#0b5759">مبيعات اليوم</text><text x="30" y="136" font-size="20" font-weight="bold" fill="#0b5759">85,000</text>
+        <rect x="156" y="72" width="124" height="86" rx="12" fill="#e5f2f2"/><text x="166" y="98" font-size="11" fill="#0b5759">تم التسليم</text><text x="166" y="136" font-size="20" font-weight="bold" fill="#0b5759">14</text>
+        <rect x="20" y="170" width="260" height="120" rx="12" fill="#fff" stroke="#eee"/>
+        <text x="30" y="196" font-size="13" font-weight="bold">تحليل المبيعات</text>
+        <rect x="30" y="212" width="26" height="36" fill="#2e9a9c"/><rect x="62" y="200" width="26" height="48" fill="#2e9a9c"/><rect x="94" y="188" width="26" height="60" fill="#2e9a9c"/><rect x="126" y="178" width="26" height="70" fill="#2e9a9c"/>
+        <text x="30" y="280" font-size="10" fill="#999">إثنين</text><text x="66" y="280" font-size="10" fill="#999">ثلاثاء</text><text x="98" y="280" font-size="10" fill="#999">أربعاء</text><text x="130" y="280" font-size="10" fill="#999">خميس</text>
+        <rect x="20" y="304" width="260" height="96" rx="12" fill="#fff" stroke="#eee"/>
+        <text x="30" y="330" font-size="13" font-weight="bold">الأعلى مبيعاً</text>
+        <text x="30" y="356" font-size="12">طماطم مصبرة</text><text x="252" y="356" font-size="12">120 قطعة</text>
+        <text x="30" y="380" font-size="12">حليب طويل الأمد</text><text x="252" y="380" font-size="12">90 قطعة</text>
+        <rect x="0" y="556" width="300" height="64" fill="#fff" stroke="#eee"/>
+        <text x="30" y="590" font-size="11" fill="#0b5759" font-weight="bold">لوحة المعلومات</text><text x="100" y="590" font-size="11" fill="#999">الكتالوج</text><text x="160" y="590" font-size="11" fill="#999">التسويق</text><text x="230" y="590" font-size="11" fill="#999">المحفظة</text>
+      </svg>
+      <div class="cap">لوحة معلومات المدير (KPIs + سلسلة المبيعات + الأفضل مبيعاً).</div>
+      <div class="how"><b>كيف تلتقطها:</b> شغّل واجهة المدير وسجّل دخول بحساب super_admin.</div>
+    </div>
+  </div>
+
+  <h2 class="chap" id="ch7">الجزء 7 — تطبيق السائق-المجهّز (Driver)</h2>
+  <div class="paper">
+    <p><span class="pill">الموضوع: أخضر #1CB01C</span> <span class="pill">ثيم فاتح</span> أقسام: الطلبات، الإحصاءات، الحساب.
+    يعتمد على Supabase Realtime في الاستقبال، وعلى FCM عند إغلاق التطبيق، وعلى طابعة حرارية Bluetooth للفاتورة.</p>
+    <h3>آلية الاستلام الذرّي (أهم نقطة)</h3>
+    <ol>
+      <li>الزبون يُنشئ طلباً → trigger <code>orders_new_order_push</code> يبثّ إشعار FCM + القائمة Realtime تتحدث عند الجميع.</li>
+      <li>أول سائق يضغط «تجهيز الطلبية» يستدعي <code>claim_order</code> الذي يقفل صف الطلب (FOR UPDATE) ويحول الحالة إلى <code>preparing</code>.</li>
+      <li>الطلبات الأخرى ترد بـ <code>order_already_claimed</code> ويختفي الطلب من طوابيرهم فوراً (Realtime).</li>
+      <li>الدفع من المحفظة يُخصم عند التجهيز في نفس المعاملة.</li>
+    </ol>
+    <h3>التنبيه الشامل (حالات الجهاز)</h3>
+    <table>
+      <tr><th>الحالة</th><th>الآلية</th><th>النتيجة</th></tr>
+      <tr><td>مفتوح (Foreground)</td><td>Realtime → NewOrderPopup</td><td>popup + نغمة (مسار ALARM) + اهتزاز</td></tr>
+      <tr><td>خلفية (عملية حيّة)</td><td>خدمة أمامية flutter_background_service + FCM</td><td>إشعار نظام heads-up بصوت/اهتزاز</td></tr>
+      <tr><td>مغلق/مقتول</td><td>FCM notification + channel driver_orders</td><td>إشعار نظام heads-up (يُفتح عند النقر)</td></tr>
+    </table>
+    <h3>الطباعة الحرارية Bluetooth</h3>
+    <p>عبر <code>unified_esc_pos_printer</code> (Bluetooth Classic SPP): فحص مقترنات، حفظ الطابعة المفضّلة، اتصال ثم
+    طباعة فاتورة ESC/POS. العربية تُرسل كصورة (raster عبر Flutter Text engine) لأن الطابعات لا تدعم النص العربي.
+    المحتوى: رقم الطلب/التاريخ/العميل/الهاتف/المنطقة/العنوان/الأصناف/المجاميع/الدفع + قصّ الورق.</p>
+  </div>
+  <div class="screen">
+    <svg viewBox="0 0 300 620" xmlns="http://www.w3.org/2000/svg">
+      <rect width="300" height="620" rx="26" fill="#f5f5f5"/><rect x="10" y="10" width="280" height="600" rx="20" fill="#fff"/>
+      <rect width="300" height="56" fill="#1cb01c"/><text x="24" y="36" fill="#fff" font-size="16" font-weight="bold">قائمة الطلبات</text>
+      <text x="20" y="84" font-size="13" font-weight="bold" fill="#127a12">الطلبات الجديدة (2)</text>
+      <rect x="20" y="96" width="260" height="118" rx="12" fill="#fff" stroke="#eee"/>
+      <text x="30" y="118" font-size="12" font-weight="bold">#8CD7E69</text>
+      <text x="200" y="118" font-size="11" fill="#2f80ed">قيد الاستلام</text>
+      <text x="30" y="142" font-size="13" font-weight="bold" fill="#127a12">وسط المدينة</text>
+      <text x="30" y="162" fill="#999" font-size="11">شارع الاستقلال</text>
+      <text x="30" y="184" font-size="12" >COD · <b>1,160 دج</b></text>
+      <rect x="30" y="192" width="240" height="16" rx="8" fill="#1cb01c"/><text x="118" y="205" fill="#fff" font-size="11" font-weight="bold">تجهيز الطلبية</text>
+      <text x="20" y="250" font-size="13" font-weight="bold" fill="#127a12">طلباتي النشطة (1)</text>
+      <rect x="20" y="262" width="260" height="96" rx="12" fill="#eef8ee"/>
+      <text x="30" y="284" font-size="12" font-weight="bold">#6027EA8</text><text x="170" y="284" font-size="11" fill="#b45309">قيد التجهيز</text>
+      <text x="30" y="308" font-size="13" font-weight="bold" fill="#127a12">حي الزهور</text>
+      <text x="30" y="330" font-size="12">COD · <b>850 دج</b></text>
+      <rect x="0" y="556" width="300" height="64" fill="#fff" stroke="#eee"/>
+      <text x="40" y="590" font-size="11" fill="#1cb01c" font-weight="bold">الطلبات</text><text x="140" y="590" font-size="11" fill="#999">الإحصاءات</text><text x="230" y="590" font-size="11" fill="#999">الحساب</text>
+    </svg>
+    <div class="cap">طابور السائق: طلبات جديدة (الكّل) + نشطة (لي).</div>
+    <div class="how"><b>كيف تلتقطها:</b> أنشئ طلباً من الزبون وأنت داخل تطبيق السائق.</div>
+  </div>
+  <div class="screen">
+    <svg viewBox="0 0 300 620" xmlns="http://www.w3.org/2000/svg">
+      <rect width="300" height="620" rx="26" fill="#f5f5f5"/><rect x="10" y="10" width="280" height="600" rx="20" fill="#fff"/>
+      <rect width="300" height="56" fill="#1cb01c"/><text x="24" y="36" fill="#fff" font-size="16" font-weight="bold">تفاصيل الطلب</text>
+      <rect x="20" y="72" width="260" height="84" rx="12" fill="#fff" stroke="#eee"/>
+      <text x="30" y="94" font-size="13" font-weight="bold">#8CD7E69</text><text x="210" y="94" font-size="11" fill="#15a05a">تم التسليم</text>
+      <text x="30" y="116" fill="#999" font-size="12">العميل: Omar · 0540668789</text>
+      <text x="30" y="138" fill="#999" font-size="12">وسط المدينة · شارع الاستقلال</text>
+      <rect x="20" y="168" width="260" height="120" rx="12" fill="#fff" stroke="#eee"/>
+      <text x="30" y="190" font-size="13" font-weight="bold">قائمة التجهيز</text>
+      <rect x="30" y="202" width="18" height="18" rx="4" fill="#1cb01c"/><text x="56" y="218" font-size="12">طماطم 2×120</text><text x="252" y="218" font-size="12" font-weight="bold">240 دج</text>
+      <rect x="30" y="230" width="18" height="18" rx="4" fill="#fff" stroke="#e53935"/><text x="56" y="246" font-size="12" fill="#999" text-decoration="line-through">جبن 1×320</text><text x="252" y="246" font-size="12" fill="#999">0 دج</text>
+      <text x="56" y="266" font-size="10" fill="#e53935" font-weight="bold">نفد المخزون</text>
+      <rect x="20" y="300" width="260" height="116" rx="12" fill="#fff8f8" stroke="#f0bdbd"/>
+      <text x="30" y="326" font-size="12">المجموع الفرعي</text><text x="252" y="326" font-size="12">240 دج</text>
+      <text x="30" y="350" font-size="12">التوصيل</text><text x="252" y="350" font-size="12">350 دج</text>
+      <text x="30" y="380" font-size="14" font-weight="bold">الإجمالي</text><text x="252" y="380" font-size="14" font-weight="bold" fill="#127a12">590 دج</text>
+      <rect x="20" y="430" width="260" height="46" rx="12" fill="#1cb01c"/><text x="104" y="458" fill="#fff" font-size="14" font-weight="bold">بداية التوصيل</text>
+      <rect x="20" y="488" width="260" height="40" rx="12" fill="#fff" stroke="#e53935"/><text x="106" y="514" fill="#e53935" font-size="13" font-weight="bold">تعذّر التسليم (مرتجع)</text>
+    </svg>
+    <div class="cap">تفاصيل الطلب: قائمة التجهيز (إزالة صنف تعيد الحساب) + الانتقالات.</div>
+    <div class="how"><b>كيف تلتقطها:</b> استلم طلباً واضغط عليه.</div>
+  </div>
+
+  <h2 class="chap" id="ch8">الجزء 8 — لوحة الإدارة (Admin Panel)</h2>
+  <div class="paper">
+    <p>صفحة ثابتة على GitHub Pages (<code>teomar007.github.io/atouga-admin-panel</code>) مكتوبة بـ HTML/JS خام + Tailwind CDN،
+    تتصل بنفس Supabase بمفتاح publishable، ولا تعرض أي شيء إلا لمستخدم <b>super_admin</b>:
+    الدخول بالبريد/كلمة المرور ثم تحقق <code>get_my_staff_role</code>.</p>
+    <h3>الأقسام</h3>
+    <ul>
+      <li><b>طلبات الوصول</b>: اعتماد كمدير/مسوّق أو رفض طلب (admin_approve/reject_access_request).</li>
+      <li><b>إنشاء حساب</b>: يوزر نيم + باسورد + دور (سائق/معبئ/إداري) عبر <code>admin-create-user</code> (أو staff)، فوراً بلا انتظار.</li>
+      <li><b>الحسابات</b>: تعديل، تغيير كلمة مرور، تجميد/تفعيل، حذف (الرئيسي محمي).</li>
+      <li><b>إخراج التطبيق من التجربة (Go Live)</b>: ملخّص أعداد كل الجداول + تحميل نسخة احتياطية + حذف انتقائي عبر
+      <code>admin_golive_summary</code>/<code>admin_golive_delete</code>/<code>admin_backup_snapshot</code> — يفصل كل مكوّن (حسابات، كوبونات واستهلاكها، طلبات وعناصرها + حركات المحفظة + تصفير الأرصدة تلقائياً، سلات، مفضلة، عناوين، منتجات، تصنيفات، بنرات، حملات، مجدولة، طلبات وصول) بتأكيد كتابة «حذف»، وبدون زر «حذف الكل».</li>
+    </ul>
+    <div class="danger">لا تُحذف من اللوحة: روابط الدعم، أوقات العمل/الورديات، مناطق التوصيل — إدارة المسيّر النهائي فقط.</div>
+  </div>
+  <div class="screen">
+    <svg viewBox="0 0 480 300" xmlns="http://www.w3.org/2000/svg">
+      <rect width="480" height="300" rx="16" fill="#f4f8f8"/><rect x="0" y="0" width="480" height="54" fill="#fff" stroke="#dce5e5"/>
+      <text x="16" y="34" font-size="16" font-weight="bold" fill="#0b5759">لوحة إدارة ATOGA</text>
+      <text x="380" y="34" font-size="12" fill="#5c6b6b">omar@…</text>
+      <g font-size="12.5" font-weight="bold">
+        <rect x="16" y="70" width="120" height="34" rx="17" fill="#107275"/><text x="30" y="92" fill="#fff">طلبات الوصول</text>
+        <rect x="146" y="70" width="110" height="34" rx="17" fill="#fff" stroke="#dce5e5"/><text x="158" y="92" fill="#5c6b6b">إنشاء حساب</text>
+        <rect x="266" y="70" width="104" height="34" rx="17" fill="#fff" stroke="#dce5e5"/><text x="278" y="92" fill="#5c6b6b">الحسابات</text>
+        <rect x="380" y="70" width="84" height="34" rx="17" fill="#fff" stroke="#a7d9bc"/><text x="390" y="92" fill="#0e6b46">Go Live</text>
+      </g>
+      <rect x="16" y="120" width="448" height="86" rx="12" fill="#fff" stroke="#cfe8d9"/>
+      <text x="30" y="146" font-size="14" font-weight="bold" fill="#0e6b46">إخراج التطبيق من التجربة</text>
+      <text x="30" y="170" font-size="12" fill="#5c6b6b">تحكّم دقيق: احذف ما تريد واحتفظ بما تريد — كل إجراء نهائي.</text>
+      <rect x="30" y="182" width="130" height="26" rx="8" fill="#fff" stroke="#0e6b46"/><text x="40" y="200" font-size="11.5" fill="#0e6b46" font-weight="bold">تحميل نسخة احتياطية</text>
+      <g font-size="11.5">
+        <rect x="16" y="220" width="212" height="30" rx="8" fill="#fff" stroke="#eee"/><text x="26" y="240" fill="#5c6b6b">☑ حساب موظف (3) مخ... </text>
+        <rect x="236" y="220" width="212" height="30" rx="8" fill="#fff" stroke="#eee"/><text x="246" y="240" fill="#5c6b6b">☑ الطلبات (12 + حركات)</text>
+      </g>
+    </svg>
+    <div class="cap">لوحة الإدارة — تبويب «إخراج التطبيق من التجربة» (لقطة حقيقية متاحة على Pages).</div>
+    <div class="how"><b>كيف تلتقطها:</b> افتح <code>teomar007.github.io/atouga-admin-panel/dashboard.html</code> وسجّل دخول super_admin.</div>
+  </div>
+
+  <h2 class="chap" id="ch9">الجزء 9 — الأمان والامتثال</h2>
+  <div class="paper">
+    <ul>
+      <li><b>RLS على كل جدول</b>؛ أي وصول كتابة عميل مقيد بـ with check (صاحب الصف/الدور فقط).</li>
+      <li><b>دوال SECURITY DEFINER</b> للعمليات المتميّزة (استلام ذرّي، محفظة، إدارة، تنظيف) مع فحص الدور داخلها (is_fulfillment_staff/is_super_admin/…).</li>
+      <li><b>مفتاح publishable فقط</b> في الكلائنات؛ service_role في Edge Functions/ترقيات فقط.</li>
+      <li><b>حماية الحساب الرئيسي</b>: guard_primary_admin يمنع حذف/تعديل dirayalab@gmail.com، واللوحة تستثنيه وتحسينك أيضاً في admin_golive_delete.</li>
+      <li><b>المحفظة محمية</b>: revoke UPDATE على العمود wallet_balance؛ الدفعات عبر RPC فقط.</li>
+      <li><b>التجميد</b>: trigger يمنع الطلب، والواجهة تعرض البانر.</li>
+      <li><b>الإشعارات</b>: القناة بصوت alarm (تُسمع بالصامت)؛ أذونات POST_NOTIFICATIONS/BLUETOOTH/FOREGROUND_SERVICE في المانيفست.</li>
+      <li><b>أسرار</b>: Vault للمفاتيح الداخلية (push_*)، Secrets للـ FIREBASE_SERVICE_ACCOUNT؛ لا تُطبع.</li>
+      <li><b>الطباعة/البلوتوث</b>: BLUETOOTH_CONNECT/SCAN + legacy، وطلب إذن وقت التشغيل.</li>
+      <li><b>الحذف النهائي</b>: DML فقط (DELETE صفوف) — لا DDL في clean-up؛ نسخة احتياطية قبل الاستخدام.</li>
+    </ul>
+  </div>
+
+  <h2 class="chap" id="ch10">الجزء 10 — دليل البناء One-Shot (الأوامر الكاملة</h2>
+  <div class="paper">
+    <h3>0) المتطلبات</h3>
+    <pre>Flutter SDK 3.38.7 (Dart 3.10.7)
+Git + حساب GitHub (Pages)
+حسابات خدمات: Supabase · Firebase · ImageKit
+مفاتيح توقيع أندرويد (للمتاجر)</pre>
+    <h3>1) قاعدة البيانات (Supabase)</h3>
+    <pre># في SQL Editor نفّذ بالترتيب:
+supabase/schema.sql
+supabase/admin_schema.sql
+supabase/admin_analytics.sql
+ثم الترقيات (خطوات أضيفت لاحقاً):
+- driver_fulfillment_core      # is_fulfillment_staff, claim/start/complete/return,
+                                set_order_item_availability, driver_stats, RLS, realtime items
+- order_delivery_zone          # delivery_zone_id/name على orders + RPC مهمة بمحفظة مع zone
+- orders_auto_delivery_zone    # trigger تعبئة تلقائية للمنطقة
+- notify_new_order_drivers     # trigger AFTER INSERT → send-push new_order
+- admin_golive_cleanup + v2    # summary/delete/backup (فوق اللوحة)
+# ثم الأسرار:
+select vault.create_secret('&lt;INTERNAL_SECRET&gt;','push_internal_secret','internal auth');
+select vault.create_secret('&lt;ANON_KEY&gt;','push_anon_key','public jwt for platform check');</pre>
+    <h3>2) Firebase</h3>
+    <pre># مشروع واحد: atoga-market
+# أضف تطبيقين أندرويد:
+  com.atogamarket.atoga_customer   → google-services.json → ATOGA_MARKET_1.1.0/android/app/
+  com.atoga.atoga_draiver          → google-services.json → ATOGA_DRAIVER/android/app/
+# Service Account JSON → Edge Secrets:
+  send-push: FIREBASE_SERVICE_ACCOUNT</pre>
+    <h3>3) Edge Functions</h3>
+    <pre>supabase functions deploy send-push
+supabase functions deploy imagekit-auth
+supabase functions deploy admin-create-user
+supabase functions deploy admin-create-staff
+supabase functions deploy admin-manage-user
+supabase functions deploy delete-account
+supabase functions deploy process-scheduled-notifications</pre>
+    <h3>4) تطبيقات Flutter — تشغيل/بناء</h3>
+    <pre># الزبون
+cd ATOGA_MARKET_1.1.0
+flutter pub get
+flutter run -d chrome --web-port=5501
+flutter build apk --release && flutter build appbundle --release
+
+# المدير
+cd ATOGA_MANAGER && flutter pub get && flutter run -d chrome --web-port=5502
+flutter build apk --release
+
+# السائق-المجهّز
+cd ATOGA_DRAIVER && flutter pub get && flutter run -d chrome --web-port=5500
+flutter build apk --release
+
+# يمكن تمرير الإعدادات عبر dart-define:
+# --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...</pre>
+    <h3>5) لوحة الإدارة (GitHub Pages)</h3>
+    <pre>cd github_admin_panel
+# عدّل config.js (SUPABASE_URL, SUPABASE_ANON_KEY)
+git add -A && git commit -m "docs" && git push origin main
+# Pages: Settings → Pages → Deploy from branch main / (/)</pre>
+    <h3>6) الجودة والتسليم</h3>
+    <pre>افتح QA_TEST_SUITE.html (أو في Desktop\ATOGAAPP)
+بعد الاختبار: Admin Panel → Go Live → نسخة احتياطية ثم تنظيف انتقائي</pre>
+  </div>
+
+  <h2 class="chap" id="ch11">الجزء 11 — الجودة والاختبار</h2>
+  <div class="paper">
+    <p>دفتر اختبار شامل: <code>Desktop\ATOGAAPP\QA_TEST_SUITE.html</code> — 233 حالة، 33 قسماً، سكورات دائرية لكل تطبيق،
+    روابط بين الاختبارات (82 رابطاً، 29 عبر التطبيقات) تُعلَّم تلقائياً عند نجاح المسبق، وملاحظات/خطورة، وتصدير JSON/PDF.
+    حالات مترابطة مثال: M-54 (شحن) ← C-61 (عرض الرصيد) ← C-56 ← C-59 ← D-06 ← D-35 ← D-36 ← M-09.</p>
+    <div class="note">تسليم نظيف: بعد اجتياز الاختبارات استخدم «إخراج التطبيق من التجربة» لحذف التجارب قبل تسليم المنظومة للزبون.</div>
+  </div>
+
+  <h2 class="chap" id="ch12">الجزء 12 — استبيان ما قبل البناء (المفاتيح المطلوبة إلزامياً)</h2>
+  <div class="paper">
+    <p>قبل أي تنفيذ يجب أن يسلّم طالب البناء كل ما يلي (نموذج قابل للتعبئة):</p>
+    <div class="qa">
+      <label>Supabase — Project URL</label><input placeholder="https://xxxx.supabase.co" />
+      <label>Supabase — publishable/anon key</label><input placeholder="sb_publishable_…" />
+      <label>Supabase — service_role key (خوادم/ترقيات فقط)</label><input />
+      <label>Supabase — كلمة مرور قاعدة البيانات (اختياري)</label><input />
+      <label>Firebase — project_id</label><input placeholder="atoga-market" />
+      <label>Firebase — google-services.json للزبون (com.atogamarket.atoga_customer)</label><input />
+      <label>Firebase — google-services.json للسائق (com.atoga.atoga_draiver)</label><input />
+      <label>Firebase — FIREBASE_SERVICE_ACCOUNT (ملف Service Account)</label><input />
+      <label>Firebase — SHA-1 بصمة (لـ Google Sign-In)</label><input />
+      <label>ImageKit — publicKey / privateKey / urlEndpoint</label><input placeholder="public / private / https://ik.imagekit.io/…" />
+      <label>GitHub — المالك/المنظمة + أسماء المستودعات الأربعة</label><input placeholder="teomar007 / atoga_customer, atoga_manager, atoga_draiver, atouga-admin-panel" />
+      <label>GitHub — PAT (اختياري للدفع/Pages)</label><input />
+      <label>Android signing — keystore/alias/passwords (لكل تطبيق يُقدَّم للمتجر)</label><input />
+      <label>Google OAuth — عميل ويب/أندرويد لربط الدخول</label><input />
+      <label>أسماء الألوان/الشعارات/الدول/العملة/اللغات</label><input placeholder="دج / عربي+فرنسي / مناطق وأسعار…" />
+      <label>بيانات تجريبية (اختبر زر SEED أم تبدأ فارغاً؟)</label><input />
+      <label>حساب المدير العام الأول (بريد)</label><input placeholder="example@gmail.com" />
+    </div>
+  </div>
+
+  <h2 class="chap" id="ch13">الجزء 13 — أسئلة المقابلة مع طالب البناء</h2>
+  <div class="paper">
+    <ol>
+      <li>هل تملك Firebase من قبل أم يجب إنشاء مشروع جديد ضمن حسابك؟</li>
+      <li>ما عملة المتجر وتنسيقها (دج/دينار/…)، وعدد اللغات المطلوبة؟</li>
+      <li>هل ستستخدم Google Maps لدبوس العنوان أم OSM/خريطة محلية؟ (المنظومة لم تستخدم API Key للخرائط.)</li>
+      <li>ما سياسة المحفظة: شحن نقدي فقط؟ هل نُبقي المحفظة أم نلغيها؟</li>
+      <li>مناطق التوصيل وأسعارها وحدّ «التوصيل المجاني»؟</li>
+      <li>أوقات العمل: فترتان/الجمل؟ هل تُدار من المدير فقط؟</li>
+      <li>المنتجات: صور من ImageKit أم من وسيط آخر؟ وهل نحتاج مخزوناً فعلياً؟</li>
+      <li>الطابعة الحرارية: طراز (Bluetooth Classic أم BLE)؟ هل نضيف النسخ الاحتياطي للطباعة؟</li>
+      <li>سلوك الإشعارات: تنبيه صوتي في الوضع الصامت؟ خدمة أمامية؟</li>
+      <li>من هم «المدير العام» وحدود الأدوار (driver/packager/dual)؟</li>
+      <li>هل يتطلب Google Sign-In إضافة SHA-1 لديك؟</li>
+      <li>هل ننشر على Google Play (AAB) أم تثبيت مباشر APK؟</li>
+    </ol>
+  </div>
+
+  <h2 class="chap" id="ch14">الجزء 14 — استكشاف الأخطاء والمراجع</h2>
+  <div class="paper">
+    <h3>أخطاء شائعة وحلولها</h3>
+    <table>
+      <tr><th>الظاهرة</th><th>السبب/الحل</th></tr>
+      <tr><td>لا يصل بثّ Realtime</td><td>تأكد أن الجدول في publication supabase_realtime وأن سياسة SELECT مطبقة لدور المستخدم.</td></tr>
+      <tr><td>طباعة حرارية لا تُظهر العربية</td><td>نستخدم raster عبر Text engine؛ تأكد من التحديث وأقترن printer قبل الطباعة.</td></tr>
+      <tr><td>إشعار عند إغلاق التطبيق لا يصل</td><td>google-services.json للحزمة، قناة driver_orders موجودة، إذن الإشعارات مقبول.</td></tr>
+      <tr><td>خطأ account_already_claimed</td><td>طبيعي: طلب استُلم من عامل آخر.</td></tr>
+      <tr><td>اللوحة لا تعرض</td><td>تحقق من الجلسة super_admin وconfig.js.</td></tr>
+      <tr><td>رفض إنشاء موظف</td><td>يوزر نيم محجوز/صيغة غير صالحة؛ الرسالة تُعرض الآن من الخادم.</td></tr>
+    </table>
+    <h3>الوثائق المترابطة داخل المستودعات — Linked Repository Docs</h3>
+    <p>كل مستودع يحوي `docs/` تُولَّد تلقائياً من الكود عبر `tool/generate_docs.dart`
+    (في التطبيقات) أو `tools/generate_docs.ps1` (في اللوحة): `DEPENDENCIES.md`،
+    `STRUCTURE.md`، `SCREENS.md` (تلقائية) و`FEATURES.md` (يدوية ثنائية اللغة)؛
+    والـ README يربط بها جميعاً. الوثيقة المركزية تُنشَر داخل لوحة الإدارة عبر GitHub Pages.</p>
+    <table>
+      <tr><th>المستودع — Repo</th><th>README</th><th>docs/ على GitHub</th></tr>
+      <tr><td>atoga_customer</td><td>github.com/teomar007/atoga_customer</td><td>…/blob/main/docs/</td></tr>
+      <tr><td>atoga_manager</td><td>github.com/teomar007/atoga_manager</td><td>…/blob/main/docs/</td></tr>
+      <tr><td>atoga_draiver</td><td>ATOGA_DRAIVER (محلي)</td><td>docs/ داخل المستودع</td></tr>
+      <tr><td>atouga-admin-panel</td><td>github.com/teomar007/atouga-admin-panel</td><td>Pages: …/docs/ATOGA_SYSTEM_DOCUMENTATION.html</td></tr>
+    </table>
+    <h3>المراجع الرسمية</h3>
+    <ul>
+      <li>Supabase: docs.supabase.com (Auth، Realtime، RLS، pg_net، Vault، Edge Functions).</li>
+      <li>Firebase Cloud Messaging: firebase.google.com/docs/cloud-messaging.</li>
+      <li>ImageKit: docs.imagekit.io (التوثيق، التحولات، auth من الخادم).</li>
+      <li>Flutter: docs.flutter.dev + pub.dev (الحزم المذكورة).</li>
+      <li>GitHub Pages: docs.github.com/pages.</li>
+      <li>ESC/POS: مواصفات EPSON ESC/POS + مكتبة unified_esc_pos_printer.</li>
+    </ul>
+  </div>
+
+  </main>
+
+  <div class="footer-note">ATOGA — توثيق معماري شامل · أُنشئ 2026 · جميع الحقوق للمنظومة ATOGA MARKET</div>
+</div>
+
+<script>
+// توليد الفهرس ونشر الأزرار (بلا مكتبات خارجية)
+document.addEventListener('DOMContentLoaded', function () {
+  var hs = document.querySelectorAll('#content h2.chap[id]');
+  var list = document.getElementById('toclist');
+  var nav = document.getElementById('topnav');
+  hs.forEach(function (h) {
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.textContent = h.textContent.trim();
+    a.href = '#' + h.id;
+    li.appendChild(a);
+    list.appendChild(li);
+    var n = document.createElement('a');
+    n.textContent = h.textContent.trim().replace(/^الجزء\s+\d+\s*[:：]?\s*/i, '');
+    n.href = '#' + h.id;
+    nav.appendChild(n);
+  });
+  // أزرار طيّ كل الشيفرات
+  var chips = document.querySelectorAll('pre');
+  chips.forEach(function (c) {
+    if (!c.closest('details')) {
+      var d = document.createElement('details');
+      var s = document.createElement('summary');
+      s.textContent = 'عرض الشيفرة';
+      c.parentNode.insertBefore(d, c);
+      d.appendChild(s);
+      d.appendChild(c);
+    }
+  });
+});
+</script>
+</body>
+</html>
