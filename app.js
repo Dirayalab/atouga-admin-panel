@@ -212,6 +212,7 @@
     initCreateAccount();
     initTabs();
     initAccounts();
+    initCleanup();
 
     (async function () {
       const session = await requireSuperAdmin();
@@ -219,7 +220,11 @@
         return;
       }
       emailEl.textContent = session.user.email || '';
+      window.adminPanelMeId = session.user.id;
       await loadRequests();
+      if (typeof window.adminPanelLoadCleanup === 'function') {
+        window.adminPanelLoadCleanup().catch(function () {});
+      }
     })();
 
     function initCreateAccount() {
@@ -287,6 +292,9 @@
         typeof window.adminPanelLoadAccounts === 'function'
           ? window.adminPanelLoadAccounts().catch(function () {})
           : Promise.resolve(),
+        typeof window.adminPanelLoadCleanup === 'function'
+          ? window.adminPanelLoadCleanup().catch(function () {})
+          : Promise.resolve(),
       ]);
     });
 
@@ -297,6 +305,9 @@
       }
       if (typeof window.adminPanelLoadAccounts === 'function') {
         window.adminPanelLoadAccounts().catch(function () {});
+      }
+      if (typeof window.adminPanelLoadCleanup === 'function') {
+        window.adminPanelLoadCleanup().catch(function () {});
       }
     });
     logoutBtn.addEventListener('click', async function () {
@@ -460,7 +471,7 @@
           tabs.querySelectorAll('.tab-btn').forEach(function (b) {
             b.classList.toggle('active', b === btn);
           });
-          ['requests', 'create', 'accounts'].forEach(function (name) {
+          ['requests', 'create', 'accounts', 'cleanup'].forEach(function (name) {
             const panel = document.getElementById('tab-' + name);
             if (panel) {
               panel.classList.toggle('hidden', name !== btn.dataset.tab);
@@ -787,7 +798,384 @@
       }
 
       window.adminPanelLoadAccounts = loadAccounts;
+
+      const cleanupTab = document.querySelector('.tab-btn[data-tab="cleanup"]');
+      if (cleanupTab) {
+        cleanupTab.addEventListener('click', function () {
+          if (typeof window.adminPanelLoadCleanup === 'function') {
+            window.adminPanelLoadCleanup().catch(function () {});
+          }
+        });
+      }
     }
+  }
+
+  // ---------- إخراج التطبيق من التجربة (تنظيف انتقائي) ----------
+  function initCleanup() {
+    const body = document.getElementById('cleanupBody');
+    const overlay = document.getElementById('modalOverlay');
+    const countEl = document.getElementById('cleanupCount');
+    const refreshBtn = document.getElementById('cleanupRefresh');
+    if (!body || !overlay) {
+      return;
+    }
+
+    function T(key, fallback) {
+      return window.I18N ? window.I18N.t(key) : fallback;
+    }
+
+    let summary = null;
+    let meId = null;
+    const sel = {
+      accounts: new Set(),
+      customers: new Set(),
+      coupons: new Set(),
+      toggles: {},
+    };
+    let ui = null;
+
+    function openModal(html) {
+      overlay.classList.remove('hidden');
+      document.getElementById('modalBox').innerHTML = html;
+    }
+
+    function closeModal() {
+      overlay.classList.add('hidden');
+      document.getElementById('modalBox').innerHTML = '';
+    }
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) {
+        closeModal();
+      }
+    });
+
+    function make(tag, cls, text) {
+      const el = document.createElement(tag);
+      if (cls) {
+        el.className = cls;
+      }
+      if (text !== undefined && text !== null) {
+        el.textContent = text;
+      }
+      return el;
+    }
+
+    function rowsOf(kind) {
+      if (kind === 'accounts') {
+        return summary.staff || [];
+      }
+      if (kind === 'customers') {
+        return summary.customers || [];
+      }
+      return summary.coupons || [];
+    }
+
+    function idOf(kind, row) {
+      return row.user_id || row.id;
+    }
+
+    function itemText(kind, row) {
+      if (kind === 'accounts') {
+        return [row.username || row.email, roleLabel(row.role), row.is_active ? '' : ' (' + T('frozenBadge', 'مجمّد') + ')'].filter(Boolean).join(' — ');
+      }
+      if (kind === 'customers') {
+        return [row.display_name || row.username || row.email || row.phone, row.phone, row.email].filter(Boolean).join(' • ');
+      }
+      return row.code + (row.title ? ' — ' + row.title : '');
+    }
+
+    function itemRow(kind, row) {
+      const label = make('label', 'gl-item');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.dataset.kind = kind;
+      cb.dataset.id = idOf(kind, row);
+      cb.checked = sel[kind].has(cb.dataset.id);
+      cb.addEventListener('change', function () {
+        if (cb.checked) {
+          sel[kind].add(cb.dataset.id);
+        } else {
+          sel[kind].delete(cb.dataset.id);
+        }
+        updateActive();
+      });
+      label.appendChild(cb);
+      label.appendChild(make('div', 'gl-meta', itemText(kind, row)));
+      return label;
+    }
+
+    function listGroup(kind, title, desc) {
+      const rows = rowsOf(kind).filter(function (r) {
+        const id = idOf(kind, r);
+        return id !== '249cac50-5ba4-4bb7-8388-c2dd8a9a7945' && id !== meId;
+      });
+      const g = make('div', 'gl-group');
+      const head = make('div', 'gl-group-head');
+      const h = make('div');
+      h.appendChild(make('h3', 'gl-title', title));
+      h.appendChild(make('p', 'gl-desc', desc));
+      head.appendChild(h);
+
+      let allSelected = false;
+      const allBtn = make('button', 'btn btn-ghost btn-sm', T('selectAll', 'تحديد الكل'));
+      function syncAllBtn() {
+        allSelected = rows.length > 0 && rows.every(function (r) {
+          return sel[kind].has(idOf(kind, r));
+        });
+        allBtn.textContent = T(allSelected ? 'clearSel' : 'selectAll', allSelected ? 'إلغاء التحديد' : 'تحديد الكل');
+      }
+      allBtn.addEventListener('click', function () {
+        syncAllBtn();
+        const next = !allSelected;
+        rows.forEach(function (r) {
+          const id = idOf(kind, r);
+          if (next) {
+            sel[kind].add(id);
+          } else {
+            sel[kind].delete(id);
+          }
+        });
+        g.querySelectorAll('.gl-item input').forEach(function (c) {
+          if (c.dataset.kind === kind) {
+            c.checked = sel[kind].has(c.dataset.id);
+          }
+        });
+        syncAllBtn();
+        updateActive();
+      });
+      syncAllBtn();
+      head.appendChild(allBtn);
+      g.appendChild(head);
+
+      const items = make('div', 'gl-items');
+      if (rows.length === 0) {
+        items.appendChild(make('p', 'gl-empty', T('noneHint', 'لا عناصر في هذه الفئة.')));
+      } else {
+        rows.forEach(function (r) {
+          items.appendChild(itemRow(kind, r));
+        });
+      }
+      g.appendChild(items);
+      return g;
+    }
+
+    function toggleRow(key, title, hint) {
+      const label = make('label', 'gl-toggle');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.dataset.toggle = key;
+      cb.checked = !!sel.toggles[key];
+      cb.addEventListener('change', function () {
+        sel.toggles[key] = cb.checked;
+        updateActive();
+      });
+      const d = make('div', 'gl-meta');
+      d.appendChild(make('b', null, title));
+      if (hint) {
+        d.appendChild(make('span', 'gl-hint', hint));
+      }
+      label.appendChild(cb);
+      label.appendChild(d);
+      return label;
+    }
+
+    function activeCount() {
+      return (
+        ['accounts', 'customers', 'coupons'].reduce(function (n, k) {
+          return n + sel[k].size;
+        }, 0) +
+        Object.keys(sel.toggles).filter(function (k) {
+          return sel.toggles[k];
+        }).length
+      );
+    }
+
+    function activePhrase() {
+      const counts = (summary && summary.counts) || {};
+      const parts = [];
+      if (sel.accounts.size) {
+        parts.push(sel.accounts.size + ' ' + T('accountsUnit', 'حساب موظف'));
+      }
+      if (sel.customers.size) {
+        parts.push(sel.customers.size + ' ' + T('customersUnit', 'حساب زبون'));
+      }
+      if (sel.coupons.size) {
+        parts.push(sel.coupons.size + ' ' + T('couponsUnit', 'كوبون'));
+      }
+      if (sel.toggles.delete_orders) {
+        parts.push((counts.orders || 0) + ' ' + T('ordersUnit', 'طلب'));
+      }
+      if (sel.toggles.delete_cart_items) {
+        parts.push(T('cartUnit', 'سلة'));
+      }
+      if (sel.toggles.delete_favorites) {
+        parts.push(T('favUnit', 'مفضلة'));
+      }
+      if (sel.toggles.delete_addresses) {
+        parts.push(T('addrUnit', 'عنوان'));
+      }
+      if (sel.toggles.delete_wallet_tx) {
+        parts.push(T('walletUnit', 'حركة محفظة'));
+      }
+      if (sel.toggles.delete_products) {
+        parts.push((counts.products || 0) + ' ' + T('productsUnit', 'منتج'));
+      }
+      if (sel.toggles.delete_categories) {
+        parts.push((counts.categories || 0) + ' ' + T('categoriesUnit', 'تصنيف'));
+      }
+      if (sel.toggles.delete_admin_requests) {
+        parts.push(T('reqUnit', 'طلب وصول'));
+      }
+      return parts.join('، ');
+    }
+
+    function updateActive() {
+      if (!ui) {
+        return;
+      }
+      const n = activeCount();
+      if (countEl) {
+        countEl.textContent = String(n);
+      }
+      if (n === 0) {
+        ui.info.textContent = T('nothingSelected', 'لم تختَر أي شيء بعد.');
+        ui.run.disabled = true;
+      } else {
+        ui.info.textContent = T('willDelete', 'سيتم حذف: ') + activePhrase();
+        ui.run.disabled = false;
+      }
+    }
+
+    function render() {
+      body.innerHTML = '';
+      const counts = (summary && summary.counts) || {};
+      body.appendChild(
+        listGroup('accounts', T('groupAccounts', 'حسابات الموظفين'), T('groupAccountsDesc', '')),
+      );
+      body.appendChild(
+        listGroup('customers', T('groupCustomers', 'حسابات الزبائن'), T('groupCustomersDesc', '')),
+      );
+      body.appendChild(
+        listGroup('coupons', T('groupCoupons', 'الكوبونات'), T('groupCouponsDesc', '')),
+      );
+
+      const toggles = make('div', 'gl-toggles');
+      toggles.appendChild(
+        toggleRow(
+          'delete_orders',
+          T('groupOrders', 'الطلبات التجريبية'),
+          T('groupOrdersDesc', '') + ' (' + (counts.orders || 0) + ' + ' + (counts.order_items || 0) + ')',
+        ),
+      );
+      toggles.appendChild(toggleRow('delete_cart_items', T('groupCart', 'سلات التسوق'), String((counts.cart_items || 0))));
+      toggles.appendChild(toggleRow('delete_favorites', T('groupFav', 'قوائم المفضلة'), String((counts.favorites || 0))));
+      toggles.appendChild(toggleRow('delete_addresses', T('groupAddrs', 'العناوين'), String((counts.addresses || 0))));
+      toggles.appendChild(toggleRow('delete_wallet_tx', T('groupWalletTx', 'حركات المحفظة'), String((counts.wallet_transactions || 0))));
+      toggles.appendChild(
+        toggleRow('delete_products', T('groupProducts', 'المنتجات'), T('groupProductsDesc', '') + ' (' + (counts.products || 0) + ')'),
+      );
+      toggles.appendChild(
+        toggleRow('delete_categories', T('groupCategories', 'التصنيفات'), T('groupCategoriesDesc', '') + ' (' + (counts.categories || 0) + ')'),
+      );
+      toggles.appendChild(toggleRow('delete_admin_requests', T('groupRequests', 'طلبات الوصول'), String((counts.admin_requests || 0))));
+      body.appendChild(toggles);
+
+      ui = {
+        bar: make('div', 'gl-actionbar'),
+        info: make('div', 'gl-activesum'),
+        run: make('button', 'btn btn-danger', T('btnRunCleanup', 'حذف المحدد نهائياً')),
+      };
+      ui.run.type = 'button';
+      ui.run.disabled = true;
+      ui.run.addEventListener('click', confirmRun);
+      ui.bar.appendChild(ui.info);
+      ui.bar.appendChild(ui.run);
+      body.appendChild(ui.bar);
+      updateActive();
+    }
+
+    async function load() {
+      meId = window.adminPanelMeId || null;
+      body.innerHTML = '';
+      body.appendChild(make('div', 'loading', T('loadingAccounts', 'جارٍ التحميل...')));
+      try {
+        const { data, error } = await supabase.rpc('admin_golive_summary');
+        if (error) {
+          throw error;
+        }
+        summary = data || {};
+        sel.accounts.clear();
+        sel.customers.clear();
+        sel.coupons.clear();
+        sel.toggles = {};
+        render();
+      } catch (error) {
+        body.innerHTML = '';
+        body.appendChild(make('div', 'empty-state', T('cantLoadCleanup', 'تعذّر تحميل بيانات التنظيف') + ': ' + friendlyError(error.message)));
+        toast(T('cantLoadCleanup', 'تعذّر تحميل بيانات التنظيف'), 'error');
+      }
+    }
+
+    function confirmRun() {
+      const phrase = activePhrase();
+      if (!phrase) {
+        return;
+      }
+      openModal(
+        '<h3 class="modal-title">' + T('confirmCleanupTitle', 'تأكيد التنظيف النهائي') + '</h3>' +
+          '<p class="modal-text">' + T('willDelete', 'سيتم حذف: ') + esc(phrase) + '.</p>' +
+          '<div class="field"><label>' + T('confirmCleanupHint', 'اكتب «حذف» للمتابعة — لا يمكن التراجع.') + '</label>' +
+          '<input id="cleanupConfirmInput" class="input" autocomplete="off" /></div>' +
+          '<div class="modal-actions">' +
+          '<button id="modalCancel" class="btn btn-ghost" type="button">' + T('modalCancel', 'إلغاء') + '</button>' +
+          '<button id="modalSave" class="btn btn-danger" type="button" disabled>' + T('btnRunCleanup', 'حذف') + '</button>' +
+          '</div>',
+      );
+      const input = document.getElementById('cleanupConfirmInput');
+      const save = document.getElementById('modalSave');
+      const target = T('confirmWord', 'حذف').trim().toLowerCase();
+      input.addEventListener('input', function () {
+        save.disabled = input.value.trim().toLowerCase() !== target;
+      });
+      document.getElementById('modalCancel').addEventListener('click', closeModal);
+      save.addEventListener('click', execute);
+    }
+
+    async function execute() {
+      const save = document.getElementById('modalSave');
+      save.disabled = true;
+      save.textContent = T('cleanupRunning', 'جارٍ التنظيف...');
+      const payload = {
+        account_ids: Array.from(sel.accounts),
+        customer_ids: Array.from(sel.customers),
+        coupon_ids: Array.from(sel.coupons),
+        delete_orders: !!sel.toggles.delete_orders,
+        delete_products: !!sel.toggles.delete_products,
+        delete_categories: !!sel.toggles.delete_categories,
+        delete_cart_items: !!sel.toggles.delete_cart_items,
+        delete_favorites: !!sel.toggles.delete_favorites,
+        delete_addresses: !!sel.toggles.delete_addresses,
+        delete_wallet_tx: !!sel.toggles.delete_wallet_tx,
+        delete_admin_requests: !!sel.toggles.delete_admin_requests,
+      };
+      try {
+        const { data, error } = await supabase.rpc('admin_golive_delete', { payload: payload });
+        if (error) {
+          throw error;
+        }
+        toast(T('cleanupDone', 'تم التنظيف بنجاح.'), 'success');
+        closeModal();
+        await load();
+      } catch (error) {
+        toast(T('cleanupFailed', 'فشل التنظيف') + ': ' + friendlyError(error.message), 'error');
+        closeModal();
+      }
+    }
+
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', load);
+    }
+    window.adminPanelLoadCleanup = load;
   }
 
   window.adminPanel = {

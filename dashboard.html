@@ -47,6 +47,7 @@
         <button type="button" class="tab-btn active" data-tab="requests" data-i18n="requestsTab">طلبات الوصول</button>
         <button type="button" class="tab-btn" data-tab="create" data-i18n="createTab">إنشاء حساب</button>
         <button type="button" class="tab-btn" data-tab="accounts" data-i18n="accountsTab">الحسابات</button>
+        <button type="button" class="tab-btn tab-go-live" data-tab="cleanup" data-i18n="cleanupTab">إخراج التطبيق من التجربة</button>
       </div>
 
       <section id="tab-requests" class="tab-panel">
@@ -108,6 +109,20 @@
         <p class="create-hint" data-i18n="protectedNote">
           الحساب الرئيسي (dirayalab@gmail.com) محمي: لا يُحذف ولا يُجمّد ولا يتغير اسم دخوله.
         </p>
+      </section>
+
+      <section id="tab-cleanup" class="tab-panel hidden">
+        <p class="section-title">
+          <span data-i18n="cleanupTitle">إخراج التطبيق من التجربة (تنظيف البيانات التجريبية)</span>
+          <span id="cleanupCount" class="counter">0</span>
+        </p>
+        <div class="gl-hero">
+          <p data-i18n="cleanupDesc">
+            تحكّم دقيق بالمحتوى قبل تسليم التطبيق للزبون: احذف ما تريد واحتفظ بما تريد. كل إجراء نهائي — تأكد قبل التنفيذ.
+          </p>
+          <button id="cleanupRefresh" class="btn btn-ghost" type="button" data-i18n="cleanupRefresh">إعادة حساب الأرقام</button>
+        </div>
+        <div id="cleanupBody"></div>
       </section>
     </main>
 
